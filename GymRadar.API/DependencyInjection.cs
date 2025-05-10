@@ -1,6 +1,8 @@
 ﻿using GymRadar.Model.Entity;
 using GymRadar.Repository.Implement;
 using GymRadar.Repository.Interface;
+using GymRadar.Service.Implement;
+using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +25,8 @@ namespace GymRadar.API
 
         public static IServiceCollection AddCustomServices(this IServiceCollection services)
         {
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAuthService, AuthService>();
             return services;
         }
         public static IServiceCollection AddHttpClientServices(this IServiceCollection services)

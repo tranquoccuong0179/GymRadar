@@ -63,7 +63,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CorsConstant.PolicyName,
         policy =>
         {
-            policy.WithOrigins("https://winnertech.cloud")
+            policy.WithOrigins("https://gymradar.cloud")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
