@@ -25,5 +25,9 @@ public partial class Account
 
     public virtual ICollection<Admin> Admins { get; set; } = new List<Admin>();
 
+    public virtual ICollection<Gym> Gyms { get; set; } = new List<Gym>();
+
+    public virtual ICollection<Pt> Pts { get; set; } = new List<Pt>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

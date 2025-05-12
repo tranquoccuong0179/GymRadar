@@ -21,5 +21,17 @@
             public const string AuthEndPoint = ApiEndpoint + "/auth";
             public const string Auth = AuthEndPoint;
         }
+
+        public static class Gym
+        {
+            public const string GymEndPoint = ApiEndpoint + "/gym";
+            public const string CreateNewGym = GymEndPoint;
+        }
+
+        public static class PT
+        {
+            public const string PTEndPoint = ApiEndpoint + "/pt";
+            public const string CreateNewPT = PTEndPoint;
+        }
     }
 }

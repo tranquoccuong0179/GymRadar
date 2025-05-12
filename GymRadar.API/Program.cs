@@ -1,5 +1,6 @@
 using GymRadar.API;
 using GymRadar.API.Constant;
+using GymRadar.Model.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -54,6 +55,13 @@ builder.Services.AddSwaggerGen(c =>
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
+    c.MapType<GenderEnum>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Enum = Enum.GetNames(typeof(GenderEnum))
+               .Select(name => new OpenApiString(name) as IOpenApiAny)
+               .ToList()
+    });
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -63,7 +71,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CorsConstant.PolicyName,
         policy =>
         {
-            policy.WithOrigins("https://gymradar.cloud")
+            policy.WithOrigins("https://gymradar.cloud", "http://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -78,6 +86,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction() || app.Env
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(CorsConstant.PolicyName);
 
 app.UseHttpsRedirection();
 

@@ -19,6 +19,10 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<Admin> Admins { get; set; }
 
+    public virtual DbSet<Gym> Gyms { get; set; }
+
+    public virtual DbSet<Pt> Pts { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -62,6 +66,54 @@ public partial class GymRadarContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Admins)
                 .HasForeignKey(d => d.AccountId)
                 .HasConstraintName("FK_Admin_Account");
+        });
+
+        modelBuilder.Entity<Gym>(entity =>
+        {
+            entity.ToTable("Gym");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.GymName).HasMaxLength(50);
+            entity.Property(e => e.Qrcode)
+                .IsUnicode(false)
+                .HasColumnName("QRCode");
+            entity.Property(e => e.RepresentName).HasMaxLength(50);
+            entity.Property(e => e.TaxCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.Gyms)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Gym_Account");
+        });
+
+        modelBuilder.Entity<Pt>(entity =>
+        {
+            entity.ToTable("PT");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.FullName).HasMaxLength(50);
+            entity.Property(e => e.Gender)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.GoalTraining).HasMaxLength(50);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.Pts)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PT_Account");
+
+            entity.HasOne(d => d.Gym).WithMany(p => p.Pts)
+                .HasForeignKey(d => d.GymId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PT_Gym_1");
         });
 
         modelBuilder.Entity<User>(entity =>

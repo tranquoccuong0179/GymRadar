@@ -12,6 +12,7 @@ namespace GymRadar.Service.Interface
     public interface IAccountService
     {
         Task<BaseResponse<RegisterResponse>> RegisterAccount(RegisterRequest request);
+        Task<BaseResponse<RegisterResponse>> RegisterAdmin(RegisterAdminRequest request);
 
     }
 }

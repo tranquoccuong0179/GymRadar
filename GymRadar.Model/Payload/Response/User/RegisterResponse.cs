@@ -10,8 +10,6 @@ namespace GymRadar.Model.Payload.Response.User
     {
         public string? Phone { get; set; }
 
-        public string? Password { get; set; }
-
         public string? Email { get; set; }
     }
 }

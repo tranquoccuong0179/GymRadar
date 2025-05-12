@@ -54,7 +54,7 @@ namespace GymRadar.Service.Implement
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                FullName = "Unknown",
+                FullName = request.FullName,
                 Dob = DateOnly.FromDateTime(DateTime.Now.AddYears(-18)),
                 Age = 18,
                 Weight = 0.0,
@@ -86,6 +86,32 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status400BadRequest.ToString(),
                 message = "Đăng kí tài khoản thất bại",
                 data = null 
+            };
+        }
+
+        public async Task<BaseResponse<RegisterResponse>> RegisterAdmin(RegisterAdminRequest request)
+        {
+            var account = _mapper.Map<Account>(request);
+            await _unitOfWork.GetRepository<Account>().InsertAsync(account);
+
+            var admin = new Admin
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                AccountId = account.Id,
+                Active = true,
+                CreateAt = TimeUtil.GetCurrentSEATime(),
+                UpdateAt = TimeUtil.GetCurrentSEATime(),
+            };
+            await _unitOfWork.GetRepository<Admin>().InsertAsync(admin);
+
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<RegisterResponse>()
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Đăng kí tài khoản thành công",
+                data = _mapper.Map<RegisterResponse>(account)
             };
         }
     }
