@@ -33,10 +33,10 @@ namespace GymRadar.API.Controllers
         ///   ```json
         ///   {
         ///     "phone": "0363919179",
-        ///     "password": "SecurePassword123",
-        ///     "email": "pt@example.com",
+        ///     "password": "0363919179",
+        ///     "email": "pt@gmail.com",
         ///     "createNewPT": {
-        ///       "fullName": "John Doe",
+        ///       "fullName": "PT1",
         ///       "dob": "1990-05-12",
         ///       "weight": 75,
         ///       "height": 175,

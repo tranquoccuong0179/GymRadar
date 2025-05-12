@@ -9,6 +9,7 @@ namespace GymRadar.Model.Payload.Response.Auth
     public class AuthenticationResponse
     {
         public Guid Id { get; set; }
+        public string? FullName { get; set; }
         public string? Phone { get; set; }
         public string? Role { get; set; }
         public string? AccessToken { get; set; }

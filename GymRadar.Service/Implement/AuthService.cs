@@ -45,6 +45,41 @@ namespace GymRadar.Service.Implement
             }
 
             RoleEnum role = EnumUtil.ParseEnum<RoleEnum>(account.Role);
+            string? fullName = null;
+            switch (role)
+            {
+                case RoleEnum.ADMIN:
+                    var admin = await _unitOfWork.GetRepository<Admin>()
+                        .SingleOrDefaultAsync(predicate: a => a.AccountId == account.Id);
+                    fullName = admin?.Name;
+                    break;
+
+                case RoleEnum.GYM:
+                    var gym = await _unitOfWork.GetRepository<Gym>()
+                        .SingleOrDefaultAsync(predicate: g => g.AccountId == account.Id);
+                    fullName = gym?.RepresentName;
+                    break;
+
+                case RoleEnum.PT:
+                    var pt = await _unitOfWork.GetRepository<Pt>()
+                        .SingleOrDefaultAsync(predicate: p => p.AccountId == account.Id);
+                    fullName = pt?.FullName;
+                    break;
+
+                case RoleEnum.USER:
+                    var user = await _unitOfWork.GetRepository<User>()
+                        .SingleOrDefaultAsync(predicate: u => u.AccountId == account.Id);
+                    fullName = user?.FullName;
+                    break;
+
+                default:
+                    return new BaseResponse<AuthenticationResponse>
+                    {
+                        status = StatusCodes.Status400BadRequest.ToString(),
+                        message = "Vai trò không hợp lệ",
+                        data = null
+                    };
+            }
             Tuple<string, Guid> guildClaim = new Tuple<string, Guid>("accountId", account.Id);
             var token = JwtUtil.GenerateJwtToken(account, guildClaim);
 
@@ -54,6 +89,7 @@ namespace GymRadar.Service.Implement
                 Phone = account.Phone,
                 Role = account.Role,
                 AccessToken = token,
+                FullName = fullName,
             };
 
             return new BaseResponse<AuthenticationResponse>
