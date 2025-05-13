@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using GymRadar.API;
 using GymRadar.API.Constant;
 using GymRadar.Model.Enum;
@@ -9,7 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,7 +78,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CorsConstant.PolicyName,
         policy =>
         {
-            policy.WithOrigins("https://gymradar.cloud", "http://localhost:5173")
+            policy.WithOrigins("https://api.gymradar.cloud", "https://gymradar.cloud", "http://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
