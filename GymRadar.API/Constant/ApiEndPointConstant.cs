@@ -1,4 +1,6 @@
-﻿namespace GymRadar.API.Constant
+﻿using System.Runtime.CompilerServices;
+
+namespace GymRadar.API.Constant
 {
     public static class ApiEndPointConstant
     {
@@ -26,12 +28,23 @@
         {
             public const string GymEndPoint = ApiEndpoint + "/gym";
             public const string CreateNewGym = GymEndPoint;
+            public const string GetAllGym = GymEndPoint;
+            public const string GetGym = GymEndPoint + "/{id}";
+            public const string GetAllPT = GymEndPoint + "/{id}/pts";
         }
 
         public static class PT
         {
             public const string PTEndPoint = ApiEndpoint + "/pt";
             public const string CreateNewPT = PTEndPoint;
+            public const string GetAllPT = PTEndPoint;
         }
+
+        public static class Admin
+        {
+            public const string AdminEndPoint = ApiEndpoint + "/admin";
+            public const string GetAllPT = AdminEndPoint + "/get-pt";
+        }
+
     }
 }

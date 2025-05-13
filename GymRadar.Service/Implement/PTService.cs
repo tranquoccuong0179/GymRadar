@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.PT;
@@ -69,6 +70,92 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Đăng kí PT thành công",
                 data = response
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPT(int page, int size)
+        {
+            Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(userId));
+
+            if (account == null)
+            {
+                return new BaseResponse<IPaginate<GetPTResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản người dùng",
+                    data = null
+                };
+            }
+
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: g => g.AccountId.Equals(userId) && g.Active == true);
+            if (gym == null)
+            {
+                return new BaseResponse<IPaginate<GetPTResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym",
+                    data = null
+                };
+            }
+
+            var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
+                selector: p => _mapper.Map<GetPTResponse>(p),
+                predicate: p => p.GymId.Equals(gym.Id) && p.Active == true,
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetPTResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách PT của phòng gym thành công",
+                data = pts
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForAdmin(int page, int size)
+        {
+            var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
+                selector: p => _mapper.Map<GetPTResponse>(p),
+                predicate: p => p.Active == true,
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetPTResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách PT thành công",
+                data = pts
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForUser(Guid id, int page, int size)
+        {
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: g => g.Id.Equals(id) && g.Active == true);
+            if (gym == null)
+            {
+                return new BaseResponse<IPaginate<GetPTResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym",
+                    data = null
+                };
+            }
+
+            var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
+                selector: p => _mapper.Map<GetPTResponse>(p),
+                predicate: p => p.GymId.Equals(gym.Id) && p.Active == true,
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetPTResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách PT của phòng gym thành công",
+                data = pts
             };
         }
     }

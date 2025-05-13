@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.Gym;
@@ -42,6 +43,46 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Đăng ký phòng gym thành công",
                 data = response
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size)
+        {
+            var gyms = await _unitOfWork.GetRepository<Gym>().GetPagingListAsync(
+                selector: g => _mapper.Map<GetGymResponse>(g),
+                predicate: g => g.Active == true,
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetGymResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách các phòng gym thành công",
+                data = gyms
+            };
+        }
+
+        public async Task<BaseResponse<GetGymResponse>> GetGymById(Guid id)
+        {
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                selector : g => _mapper.Map<GetGymResponse>(g),
+                predicate: g => g.Id.Equals(id) && g.Active == true);
+
+            if (gym == null)
+            {
+                return new BaseResponse<GetGymResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym này",
+                    data = null
+                };
+            }
+
+            return new BaseResponse<GetGymResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy thông tin phòng gym thành công",
+                data = gym
             };
         }
     }

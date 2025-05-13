@@ -19,11 +19,13 @@ namespace GymRadar.Model.Mapper
             CreateMap<CreateNewGymRequest, Gym>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.HotResearch, opt => opt.MapFrom(src => false))
-                .ForMember(dest => dest.Active, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.Active, opt => opt.MapFrom(src => true))
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => TimeUtil.GetCurrentSEATime()))
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => TimeUtil.GetCurrentSEATime()));
 
             CreateMap<Gym, CreateNewGymResponse>();
+
+            CreateMap<Gym, GetGymResponse>();
         }
     }
 }

@@ -5,15 +5,20 @@ using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Payload.Response.Gym;
 using GymRadar.Model.Payload.Request.User;
+using GymRadar.Model.Paginate;
+using GymRadar.Model.Payload.Response.PT;
+using GymRadar.Service.Implement;
 
 namespace GymRadar.API.Controllers
 {
     public class GymController : BaseController<GymController>
     {
         private readonly IGymService _gymService;
-        public GymController(ILogger<GymController> logger, IGymService gymService) : base(logger)
+        private readonly IPTService _ptService;
+        public GymController(ILogger<GymController> logger, IGymService gymService, IPTService ptService) : base(logger)
         {
             _gymService = gymService;
+            _ptService = ptService;
         }
 
         /// <summary>
@@ -85,6 +90,182 @@ namespace GymRadar.API.Controllers
         public async Task<IActionResult> CreateNewGym([FromBody] RegisterAccountGymRequest request)
         {
             var response = await _gymService.CreateNewGym(request);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        /// <summary>
+        /// API lấy danh sách phòng gym với phân trang.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép lấy danh sách phòng gym với hỗ trợ phân trang thông qua các tham số `page` và `size`.
+        /// - Nếu không cung cấp `page`, mặc định là 1. Nếu không cung cấp `size`, mặc định là 10.
+        /// - API không yêu cầu xác thực (công khai cho người dùng).
+        /// - API dùng cho người dùng tìm kiếm phòng gym.
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/v1/gym?page=1&amp;size=10
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy danh sách phòng gym thành công. Trả về `BaseResponse&lt;IPaginate&lt;GetGymResponse&gt;&gt;` chứa danh sách phòng gym và thông tin phân trang.
+        ///   - `400 Bad Request`: Tham số đầu vào không hợp lệ (ví dụ: `page` hoặc `size` nhỏ hơn 1).
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy danh sách các phòng gym thành công",
+        ///     "data": {
+        ///       "size": 10,
+        ///       "page": 1,
+        ///       "total": 2,
+        ///       "totalPages": 1,
+        ///       "items": [
+        ///         {
+        ///           "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///           "gymName": "Gym PL",
+        ///           "since": 2020,
+        ///           "address": "FPT",
+        ///           "representName": "PL",
+        ///           "taxCode": "1234567890",
+        ///           "longitude": 105.801,
+        ///           "latitude": 21.013,
+        ///           "qrcode": "qrcode123456",
+        ///           "hotResearch": true
+        ///         }
+        ///       ]
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="page">Số trang (tùy chọn, mặc định là 1).</param>
+        /// <param name="size">Kích thước trang (tùy chọn, mặc định là 10).</param>
+        /// <returns>
+        /// - `200 OK`: Lấy danh sách phòng gym thành công.
+        /// - `400 Bad Request`: Tham số đầu vào không hợp lệ.
+        /// </returns>
+        /// <response code="200">Trả về danh sách phòng gym và thông tin phân trang khi yêu cầu thành công.</response>
+        /// <response code="400">Trả về lỗi nếu tham số `page` hoặc `size` không hợp lệ.</response>
+        [HttpGet(ApiEndPointConstant.Gym.GetAllGym)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetGymResponse>>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllGym([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _gymService.GetAllGym(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        /// <summary>
+        /// API lấy thông tin chi tiết một phòng gym theo ID.
+        /// </summary>
+        /// <remarks>
+        /// - API này trả về thông tin chi tiết của phòng gym dựa trên `id` cung cấp.
+        /// - API không yêu cầu xác thực (công khai cho người dùng).
+        /// - API dùng cho người dùng xem chi tiết phòng gym.
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/v1/gym/3fa85f64-5717-4562-b3fc-2c963f66afa6
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy thông tin phòng gym thành công. Trả về `BaseResponse&lt;GetGymResponse&gt;` chứa thông tin phòng gym.
+        ///   - `404 NotFound`: Không tìm thấy phòng gym với `id` cung cấp.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy thông tin phòng gym thành công",
+        ///     "data": {
+        ///       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///       "gymName": "GymPL",
+        ///       "since": 2020,
+        ///       "address": "FPT",
+        ///       "representName": "PL",
+        ///       "taxCode": "1234567890",
+        ///       "longitude": 105.801,
+        ///       "latitude": 21.013,
+        ///       "qrcode": "qrcode123456",
+        ///       "hotResearch": true
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của phòng gym cần lấy thông tin.</param>
+        /// <returns>
+        /// - `200 OK`: Lấy thông tin phòng gym thành công.
+        /// - `404 NotFound`: Không tìm thấy phòng gym này.
+        /// </returns>
+        /// <response code="200">Trả về thông tin chi tiết phòng gym khi yêu cầu thành công.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy phòng gym.</response>
+        [HttpGet(ApiEndPointConstant.Gym.GetGym)]
+        [ProducesResponseType(typeof(BaseResponse<GetGymResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetGymResponse>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetGym([FromRoute] Guid id)
+        {
+            var response = await _gymService.GetGymById(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        /// <summary>
+        /// API lấy danh sách huấn luyện viên cá nhân (PT) của một phòng gym cho người dùng.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép người dùng lấy danh sách PT thuộc phòng gym được chỉ định bởi `id` (gymId) với hỗ trợ phân trang thông qua `page` và `size`.
+        /// - Nếu không cung cấp `page`, mặc định là 1. Nếu không cung cấp `size`, mặc định là 10.
+        /// - API không yêu cầu xác thực (công khai cho người dùng).
+        /// - API dùng để người dùng xem danh sách PT của một phòng gym cụ thể.
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/v1/gym/3fa85f64-5717-4562-b3fc-2c963f66afa6/pts?page=1&amp;size=10
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy danh sách PT thành công. Trả về `BaseResponse&lt;IPaginate&lt;GetPTResponse&gt;&gt;` chứa danh sách PT và thông tin phân trang.
+        ///   - `400 Bad Request`: Tham số đầu vào không hợp lệ (ví dụ: `page` hoặc `size` nhỏ hơn 1).
+        ///   - `404 NotFound`: Không tìm thấy phòng gym với `id` cung cấp hoặc không có PT nào thuộc phòng gym.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy danh sách PT của phòng gym thành công",
+        ///     "data": {
+        ///       "size": 10,
+        ///       "page": 1,
+        ///       "total": 2,
+        ///       "totalPages": 1,
+        ///       "items": [
+        ///         {
+        ///           "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///           "fullName": "Phong Lâm,
+        ///           "dob": "1990-05-15",
+        ///           "weight": 75.5,
+        ///           "height": 175.0,
+        ///           "goalTraining": "Tăng cơ",
+        ///           "experience": 5,
+        ///           "gender": "Male"
+        ///         }
+        ///       ]
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của phòng gym để lấy danh sách PT (gymId).</param>
+        /// <param name="page">Số trang (tùy chọn, mặc định là 1).</param>
+        /// <param name="size">Kích thước trang (tùy chọn, mặc định là 10).</param>
+        /// <returns>
+        /// - `200 OK`: Lấy danh sách PT thành công.
+        /// - `404 NotFound`: Không tìm thấy phòng gym hoặc PT.
+        /// </returns>
+        /// <response code="200">Trả về danh sách PT và thông tin phân trang khi yêu cầu thành công.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy phòng gym hoặc PT.</response>
+        [HttpGet(ApiEndPointConstant.Gym.GetAllPT)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetPTResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetPTResponse>>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllPT([FromRoute] Guid id, [FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _ptService.GetAllPTForUser(id, pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
     }
