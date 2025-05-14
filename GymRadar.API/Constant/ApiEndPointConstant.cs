@@ -31,6 +31,7 @@ namespace GymRadar.API.Constant
             public const string GetAllGym = GymEndPoint;
             public const string GetGym = GymEndPoint + "/{id}";
             public const string GetAllPT = GymEndPoint + "/{id}/pts";
+            public const string GetAllCourse = GymEndPoint + "/{id}/courses";
         }
 
         public static class PT
@@ -45,6 +46,13 @@ namespace GymRadar.API.Constant
             public const string AdminEndPoint = ApiEndpoint + "/admin";
             public const string CreateAdmin = AdminEndPoint;
             public const string GetAllPT = AdminEndPoint + "/get-pt";
+        }
+
+        public static class GymCourse
+        {
+            public const string GymCourseEndPoint = ApiEndpoint + "/course";
+            public const string CreateGymCourse = GymCourseEndPoint;
+            public const string GetAllGymCourse = GymCourseEndPoint;
         }
 
     }

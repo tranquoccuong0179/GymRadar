@@ -11,7 +11,7 @@ public partial class GymCourse
 
     public double Price { get; set; }
 
-    public long Duration { get; set; }
+    public int Duration { get; set; }
 
     public string Type { get; set; } = null!;
 

@@ -8,6 +8,7 @@ using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.PT;
 using GymRadar.Service.Implement;
+using GymRadar.Model.Payload.Response.GymCourse;
 
 namespace GymRadar.API.Controllers
 {
@@ -15,10 +16,12 @@ namespace GymRadar.API.Controllers
     {
         private readonly IGymService _gymService;
         private readonly IPTService _ptService;
-        public GymController(ILogger<GymController> logger, IGymService gymService, IPTService ptService) : base(logger)
+        private readonly IGymCourseService _courseService;
+        public GymController(ILogger<GymController> logger, IGymService gymService, IPTService ptService, IGymCourseService courseService) : base(logger)
         {
             _gymService = gymService;
             _ptService = ptService;
+            _courseService = courseService;
         }
 
         /// <summary>
@@ -266,6 +269,69 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _ptService.GetAllPTForUser(id, pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        /// <summary>
+        /// API lấy danh sách các khóa học của một phòng gym cho người dùng.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép người dùng lấy danh sách các khóa học thuộc phòng gym được chỉ định bởi `id` (GymId) với hỗ trợ phân trang thông qua `page` và `size`.
+        /// - Nếu không cung cấp `page`, mặc định là 1. Nếu không cung cấp `size`, mặc định là 10.
+        /// - API không yêu cầu xác thực (công khai cho người dùng).
+        /// - API dùng để người dùng xem các khóa học của một phòng gym cụ thể (ví dụ: Yoga, Gym với PT).
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/gym/3fa85f64-5717-4562-b3fc-2c963f66afa6/courses?page=1&amp;size=10
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy danh sách khóa học thành công. Trả về `BaseResponse&lt;IPaginate&lt;GetGymCourseResponse&gt;&gt;` chứa danh sách khóa học và thông tin phân trang.
+        ///   - `400 Bad Request`: Tham số đầu vào không hợp lệ (ví dụ: `page` hoặc `size` nhỏ hơn 1).
+        ///   - `404 NotFound`: Không tìm thấy phòng gym với `id` cung cấp hoặc không có khóa học nào thuộc phòng gym.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy danh sách khóa tập thành công",
+        ///     "data": {
+        ///       "size": 10,
+        ///       "page": 1,
+        ///       "total": 2,
+        ///       "totalPages": 1,
+        ///       "items": [
+        ///         {
+        ///           "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///           "name": "Gói 1",
+        ///           "price": 500000,
+        ///           "duration": 30,
+        ///           "type": "Normal",
+        ///           "description": "Khóa học dành cho người mới bắt đầu",
+        ///           "image": "bla bla"
+        ///         }
+        ///       ]
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của phòng gym để lấy danh sách khóa học (GymId).</param>
+        /// <param name="page">Số trang (tùy chọn, mặc định là 1).</param>
+        /// <param name="size">Kích thước trang (tùy chọn, mặc định là 10).</param>
+        /// <returns>
+        /// - `200 OK`: Lấy danh sách khóa học thành công.
+        /// - `400 Bad Request`: Tham số đầu vào không hợp lệ.
+        /// - `404 NotFound`: Không tìm thấy phòng gym hoặc khóa học.
+        /// </returns>
+        /// <response code="200">Trả về danh sách khóa học và thông tin phân trang khi yêu cầu thành công.</response>
+        /// <response code="400">Trả về lỗi nếu tham số `page` hoặc `size` không hợp lệ.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy phòng gym.</response>
+        [HttpGet(ApiEndPointConstant.Gym.GetAllCourse)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetGymCourseResponse>>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllCourse([FromRoute]Guid id, [FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _courseService.GetAllGymCourseForUser(id, pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
     }
