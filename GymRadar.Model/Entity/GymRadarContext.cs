@@ -21,6 +21,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<Gym> Gyms { get; set; }
 
+    public virtual DbSet<GymCourse> GymCourses { get; set; }
+
     public virtual DbSet<Pt> Pts { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -89,6 +91,23 @@ public partial class GymRadarContext : DbContext
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Gym_Account");
+        });
+
+        modelBuilder.Entity<GymCourse>(entity =>
+        {
+            entity.ToTable("GymCourse");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Type).HasMaxLength(50);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Gym).WithMany(p => p.GymCourses)
+                .HasForeignKey(d => d.GymId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GymCourse_Gym");
         });
 
         modelBuilder.Entity<Pt>(entity =>

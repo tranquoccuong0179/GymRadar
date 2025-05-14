@@ -43,6 +43,7 @@ namespace GymRadar.API.Constant
         public static class Admin
         {
             public const string AdminEndPoint = ApiEndpoint + "/admin";
+            public const string CreateAdmin = AdminEndPoint;
             public const string GetAllPT = AdminEndPoint + "/get-pt";
         }
 

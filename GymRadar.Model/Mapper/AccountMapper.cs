@@ -30,7 +30,7 @@ namespace GymRadar.Model.Mapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => PasswordUtil.HashPassword(src.Password)))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => RoleEnum.ADMIN.GetDescriptionFromEnum()))
-                .ForMember(dest => dest.Active, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.Active, opt => opt.MapFrom(src => true))
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => TimeUtil.GetCurrentSEATime()))
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => TimeUtil.GetCurrentSEATime()));
 

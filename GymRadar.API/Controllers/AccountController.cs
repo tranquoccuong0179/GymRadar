@@ -67,5 +67,15 @@ namespace GymRadar.API.Controllers
             var response = await _accountService.RegisterAccount(request);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpPost(ApiEndPointConstant.Admin.CreateAdmin)]
+        [ProducesResponseType(typeof(BaseResponse<RegisterResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<RegisterResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> CreateAdmin([FromBody] RegisterAdminRequest request)
+        {
+            var response = await _accountService.RegisterAdmin(request);
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }
