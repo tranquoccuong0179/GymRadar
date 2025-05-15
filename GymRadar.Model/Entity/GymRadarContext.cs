@@ -25,6 +25,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<Pt> Pts { get; set; }
 
+    public virtual DbSet<Slot> Slots { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -133,6 +135,19 @@ public partial class GymRadarContext : DbContext
                 .HasForeignKey(d => d.GymId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PT_Gym_1");
+        });
+
+        modelBuilder.Entity<Slot>(entity =>
+        {
+            entity.ToTable("Slot");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.EndTime).HasPrecision(0);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.StartTime).HasPrecision(0);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<User>(entity =>
