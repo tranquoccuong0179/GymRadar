@@ -9,6 +9,7 @@ using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.Slot;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.Slot;
+using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,34 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Tạo slot thành công",
                 data = _mapper.Map<CreateNewSlotResponse>(slot)
+            };
+        }
+
+        public async Task<BaseResponse<bool>> DeleteSlot(Guid id)
+        {
+            var slot = await _unitOfWork.GetRepository<Slot>().SingleOrDefaultAsync(
+                predicate: s => s.Id.Equals(id) && s.Active == true);
+
+            if (slot == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy slot",
+                    data = false
+                };
+            }
+
+            slot.Active = false;
+            slot.DeleteAt = TimeUtil.GetCurrentSEATime();
+            _unitOfWork.GetRepository<Slot>().UpdateAsync(slot);
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<bool>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Xóa slot thành công",
+                data = true
             };
         }
 

@@ -61,6 +61,7 @@ namespace GymRadar.API.Constant
             public const string CreateSlot = SlotEndPoint;
             public const string GetAllSlot = SlotEndPoint;
             public const string GetSlot = SlotEndPoint + "/{id}";
+            public const string DeleteSlot = SlotEndPoint + "/{id}";
         }
 
     }

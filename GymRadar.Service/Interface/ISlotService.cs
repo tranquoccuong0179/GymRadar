@@ -15,5 +15,6 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<CreateNewSlotResponse>> CreateSlot(CreateNewSlotRequest request);
         Task<BaseResponse<IPaginate<GetSlotResponse>>> GetAllSlot(int page, int size);
         Task<BaseResponse<GetSlotResponse>> GetSlot(Guid id);
+        Task<BaseResponse<bool>> DeleteSlot(Guid id);
     }
 }

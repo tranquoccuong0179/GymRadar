@@ -29,7 +29,7 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
-        [HttpPost(ApiEndPointConstant.Slot.GetAllSlot)]
+        [HttpGet(ApiEndPointConstant.Slot.GetAllSlot)]
         [ProducesResponseType(typeof(BaseResponse<IPaginate<GetSlotResponse>>), StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> GetAllSlot([FromQuery] int? page, [FromQuery] int? size)
@@ -40,13 +40,23 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
-        [HttpPost(ApiEndPointConstant.Slot.GetSlot)]
+        [HttpGet(ApiEndPointConstant.Slot.GetSlot)]
         [ProducesResponseType(typeof(BaseResponse<GetSlotResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<GetSlotResponse>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> GetSlot([FromRoute] Guid id)
         {
             var response = await _slotService.GetSlot(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpDelete(ApiEndPointConstant.Slot.DeleteSlot)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> DeleteSlot([FromRoute] Guid id)
+        {
+            var response = await _slotService.DeleteSlot(id);
             return StatusCode(int.Parse(response.status), response);
         }
     }
