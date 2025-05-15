@@ -24,7 +24,7 @@ namespace GymRadar.Service.Implement
         {
         }
 
-        public async Task<BaseResponse<CreateNewSlotResponse>> CreateSlot([FromBody] CreateNewSlotRequest request)
+        public async Task<BaseResponse<CreateNewSlotResponse>> CreateSlot(CreateNewSlotRequest request)
         {
             var slot = _mapper.Map<Slot>(request);
 
