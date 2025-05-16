@@ -7,6 +7,7 @@ using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Payload.Response.PT;
 using GymRadar.Model.Paginate;
+using GymRadar.Model.Payload.Request.PT;
 
 namespace GymRadar.API.Controllers
 {
@@ -191,6 +192,16 @@ namespace GymRadar.API.Controllers
         public async Task<IActionResult> DeletePT([FromRoute] Guid id)
         {
             var response = await _ptService.DeletePT(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpPut(ApiEndPointConstant.PT.UpdatePT)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> UpdatePT([FromBody] UpdatePTRequest request)
+        {
+            var response = await _ptService.UpdatePT(request);
             return StatusCode(int.Parse(response.status), response);
         }
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
 using GymRadar.Model.Paginate;
+using GymRadar.Model.Payload.Request.PT;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.PT;
@@ -212,6 +213,54 @@ namespace GymRadar.Service.Implement
                 message = "Lấy danh sách PT của phòng gym thành công",
                 data = pts
             };
+        }
+
+        public async Task<BaseResponse<GetPTResponse>> UpdatePT(UpdatePTRequest request)
+        {
+            Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(userId) && a.Active == true);
+            if (account == null)
+            {
+                return new BaseResponse<GetPTResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản",
+                    data = null
+                };
+            }
+
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: pt => pt.AccountId.Equals(userId) && pt.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<GetPTResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy pt",
+                    data = null
+                };
+            }
+
+            pt.FullName = string.IsNullOrEmpty(request.FullName) ? pt.FullName : request.FullName;
+            pt.Dob = request.Dob.HasValue ? request.Dob.Value : pt.Dob;
+            pt.Height = request.Height.HasValue ? request.Height.Value : pt.Height;
+            pt.Weight = request.Weight.HasValue ? request.Weight.Value : pt.Weight;
+            pt.GoalTraining = string.IsNullOrEmpty(request.GoalTraining) ? pt.GoalTraining : request.GoalTraining;
+            pt.Experience = request.Experience.HasValue ? request.Experience.Value : pt.Experience;
+            pt.Gender = request.Gender.HasValue ? request.Gender.GetDescriptionFromEnum() : pt.Gender;
+
+            _unitOfWork.GetRepository<Pt>().UpdateAsync(pt);
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<GetPTResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Cập nhật thành công",
+                data = _mapper.Map<GetPTResponse>(pt)
+            }
+            throw new NotImplementedException();
         }
     }
 }

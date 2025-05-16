@@ -42,6 +42,7 @@ namespace GymRadar.API.Constant
             public const string CreateNewPT = PTEndPoint;
             public const string GetAllPT = PTEndPoint;
             public const string DeletePT = PTEndPoint + "/{id}";
+            public const string UpdatePT = PTEndPoint;
         }
 
         public static class Admin
