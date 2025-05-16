@@ -62,7 +62,7 @@ namespace GymRadar.Service.Implement
                 Gender = "Unknown",
                 Address = "Unknown",
                 AccountId = account.Id,
-                Active = false,
+                Active = true,
                 CreateAt = TimeUtil.GetCurrentSEATime(),
                 UpdateAt = TimeUtil.GetCurrentSEATime(),
                 DeleteAt = null
@@ -113,6 +113,97 @@ namespace GymRadar.Service.Implement
                 message = "Đăng kí tài khoản thành công",
                 data = _mapper.Map<RegisterResponse>(account)
             };
+        }
+
+        public async Task<BaseResponse<GetUserProfileResponse>> UserProfile()
+        {
+            Guid? accountId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: u => u.Id.Equals(accountId) && u.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<GetUserProfileResponse>()
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản",
+                    data = null
+                };
+            }
+
+            GetUserProfileResponse response = new GetUserProfileResponse
+            {
+                Phone = account.Phone,
+                Email = account.Email,
+            };
+
+            string role = account.Role;
+
+            switch (role)
+            {
+                case "PT":
+                    var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                        predicate: pt => pt.AccountId.Equals(accountId) && pt.Active == true);
+
+                    if(pt == null)
+                    {
+                        return new BaseResponse<GetUserProfileResponse>
+                        {
+                            status = StatusCodes.Status404NotFound.ToString(),
+                            message = "Không tìm thấy hồ sơ của người dùng",
+                            data = null
+                        };
+                    }
+
+                    response.Age = CalculateAge(pt.Dob);
+                    response.DOB = pt.Dob;
+                    response.FullName = pt.FullName;
+                    response.Weight = pt.Weight;
+                    response.Height = pt.Height;
+                    break;
+                case "USER":
+                    var user = await _unitOfWork.GetRepository<User>().SingleOrDefaultAsync(
+                        predicate: u => u.AccountId.Equals(accountId) && u.Active == true);
+
+                    if (user == null)
+                    {
+                        return new BaseResponse<GetUserProfileResponse>
+                        {
+                            status = StatusCodes.Status404NotFound.ToString(),
+                            message = "Không tìm thấy hồ sơ của người dùng",
+                            data = null
+                        };
+                    }
+
+                    response.Age = CalculateAge(user.Dob);
+                    response.DOB = user.Dob;
+                    response.FullName = user.FullName;
+                    response.Weight = user.Weight;
+                    response.Height = user.Height;
+                    break;
+                default:
+                    return new BaseResponse<GetUserProfileResponse>
+                    {
+                        status = StatusCodes.Status403Forbidden.ToString(),
+                        message = "Vai trò không phù hợp",
+                        data = null
+                    };
+            }
+
+            return new BaseResponse<GetUserProfileResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy thông tin hồ sơ người dùng thành công",
+                data = response
+            };
+        }
+
+        private int CalculateAge(DateOnly dob)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            int age = today.Year - dob.Year;
+            if (dob > today.AddYears(-age)) age--;
+            return age;
         }
     }
 }

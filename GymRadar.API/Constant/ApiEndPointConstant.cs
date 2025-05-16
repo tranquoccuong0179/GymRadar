@@ -16,6 +16,7 @@ namespace GymRadar.API.Constant
         {
             public const string AccountEndPoint = ApiEndpoint + "/account";
             public const string RegisterAccount = AccountEndPoint;
+            public const string GetProfile = AccountEndPoint + "/profile";
         }
 
         public static class Authentication

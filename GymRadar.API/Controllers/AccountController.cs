@@ -77,5 +77,57 @@ namespace GymRadar.API.Controllers
             var response = await _accountService.RegisterAdmin(request);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        /// <summary>
+        /// API lấy thông tin hồ sơ cá nhân của người dùng (User) hoặc huấn luyện viên cá nhân (PT).
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép người dùng hoặc PT lấy thông tin hồ sơ cá nhân, bao gồm họ tên, email, số điện thoại, ngày sinh, tuổi, cân nặng và chiều cao.
+        /// - API yêu cầu xác thực (JWT) và chỉ dành cho người dùng có vai trò User hoặc PT.
+        /// - Thông tin được trả về dựa trên tài khoản đang đăng nhập (lấy từ token).
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/v1/account/profile
+        ///   Authorization: Bearer &lt;JWT_token&gt;
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy thông tin hồ sơ người dùng thành công. Trả về `BaseResponse&lt;GetUserProfileResponse&gt;` chứa thông tin hồ sơ.
+        ///   - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        ///   - `404 NotFound`: Không tìm thấy hồ sơ của người dùng hoặc PT.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy thông tin hồ sơ người dùng thành công",
+        ///     "data": {
+        ///       "fullName": "Trần Quốc Cường",
+        ///       "email": "cuongtq@gmail.com",
+        ///       "phone": "0363919179",
+        ///       "dob": "2002-07-13",
+        ///       "age": 35,
+        ///       "weight": 75.5,
+        ///       "height": 175.0
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <returns>
+        /// - `200 OK`: Lấy thông tin hồ sơ người dùng thành công.
+        /// - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        /// - `404 NotFound`: Không tìm thấy hồ sơ.
+        /// </returns>
+        /// <response code="200">Trả về thông tin hồ sơ cá nhân khi yêu cầu thành công.</response>
+        /// <response code="401">Trả về lỗi nếu không cung cấp token hợp lệ.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy hồ sơ.</response>
+        [HttpGet(ApiEndPointConstant.Account.GetProfile)]
+        [ProducesResponseType(typeof(BaseResponse<GetUserProfileResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetUserProfileResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(BaseResponse<GetUserProfileResponse>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetProfile()
+        {
+            var response = await _accountService.UserProfile();
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }

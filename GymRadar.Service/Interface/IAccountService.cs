@@ -13,6 +13,7 @@ namespace GymRadar.Service.Interface
     {
         Task<BaseResponse<RegisterResponse>> RegisterAccount(RegisterRequest request);
         Task<BaseResponse<RegisterResponse>> RegisterAdmin(RegisterAdminRequest request);
+        Task<BaseResponse<GetUserProfileResponse>> UserProfile();
 
     }
 }
