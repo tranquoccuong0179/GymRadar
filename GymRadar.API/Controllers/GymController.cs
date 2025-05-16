@@ -9,6 +9,7 @@ using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.PT;
 using GymRadar.Service.Implement;
 using GymRadar.Model.Payload.Response.GymCourse;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymRadar.API.Controllers
 {
@@ -335,8 +336,47 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+        /// <summary>
+        /// API cho phép Admin xóa phòng gym theo ID.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép Admin xóa một phòng gym dựa trên `id` cung cấp.
+        /// - API yêu cầu xác thực (JWT) và chỉ dành cho người dùng có vai trò Admin.
+        /// - API dùng để quản lý danh sách phòng gym (xóa phòng gym không còn hoạt động).
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   DELETE /api/gym/3fa85f64-5717-4562-b3fc-2c963f66afa6
+        ///   Authorization: Bearer &lt;JWT_token&gt;
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Xóa phòng gym thành công. Trả về `BaseResponse&lt;bool&gt;` với giá trị `true`.
+        ///   - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        ///   - `403 Forbidden`: Người dùng không có quyền Admin.
+        ///   - `404 NotFound`: Không tìm thấy phòng gym với `id` cung cấp.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Xóa phòng gym thành công",
+        ///     "data": true
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của phòng gym cần xóa.</param>
+        /// <returns>
+        /// - `200 OK`: Xóa phòng gym thành công.
+        /// - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        /// - `403 Forbidden`: Người dùng không có quyền Admin.
+        /// - `404 NotFound`: Không tìm thấy phòng gym.
+        /// </returns>
+        /// <response code="200">Trả về `true` khi xóa phòng gym thành công.</response>
+        /// <response code="401">Trả về lỗi nếu không cung cấp token hợp lệ.</response>
+        /// <response code="403">Trả về lỗi nếu người dùng không có quyền Admin.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy phòng gym.</response>
         [HttpDelete(ApiEndPointConstant.Gym.DeleteGym)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> DeleteGym([FromRoute] Guid id)

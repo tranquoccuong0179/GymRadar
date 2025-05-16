@@ -185,8 +185,47 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+        /// <summary>
+        /// API xóa huấn luyện viên cá nhân (PT) theo ID, dành cho chủ phòng gym.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép chủ phòng gym xóa một PT dựa trên `id` cung cấp.
+        /// - API yêu cầu xác thực (JWT) và người dùng phải có vai trò chủ phòng gym.
+        /// - API chỉ xóa PT thuộc phòng gym của chủ sở hữu.
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   DELETE /api/v1/pt/3fa85f64-5717-4562-b3fc-2c963f66afa6
+        ///   Authorization: Bearer &lt;JWT_token&gt;
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Xóa PT thành công. Trả về `BaseResponse&lt;bool&gt;` với giá trị `true`.
+        ///   - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        ///   - `403 Forbidden`: Người dùng không có quyền chủ phòng gym hoặc không sở hữu PT.
+        ///   - `404 NotFound`: Không tìm thấy PT với `id` cung cấp.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Xóa PT thành công",
+        ///     "data": true
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của PT cần xóa.</param>
+        /// <returns>
+        /// - `200 OK`: Xóa PT thành công.
+        /// - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        /// - `403 Forbidden`: Người dùng không có quyền chủ phòng gym.
+        /// - `404 NotFound`: Không tìm thấy PT.
+        /// </returns>
+        /// <response code="200">Trả về `true` khi xóa PT thành công.</response>
+        /// <response code="401">Trả về `false` lỗi nếu không cung cấp token hợp lệ.</response>
+        /// <response code="403">Trả về `false lỗi nếu người dùng không có quyền chủ phòng gym.</response>
+        /// <response code="404">Trả về `false lỗi nếu không tìm thấy PT.</response>
         [HttpDelete(ApiEndPointConstant.PT.DeletePT)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> DeletePT([FromRoute] Guid id)
@@ -195,9 +234,63 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+        /// <summary>
+        /// API cho phép huấn luyện viên cá nhân (PT) tự cập nhật thông tin hồ sơ cá nhân.
+        /// </summary>
+        /// <remarks>
+        /// - API này cho phép PT cập nhật thông tin cá nhân, bao gồm họ tên, ngày sinh, cân nặng, chiều cao, mục tiêu tập luyện, kinh nghiệm, và giới tính.
+        /// - API yêu cầu xác thực (JWT) và chỉ dành cho người dùng có vai trò PT.
+        /// - Các trường có giá trị `null` trong yêu cầu sẽ giữ nguyên giá trị cũ; các trường có giá trị mới sẽ được thay thế.
+        /// - Thông tin được cập nhật dựa trên tài khoản PT đang đăng nhập (lấy từ token).
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   PUT /api/v1/pt
+        ///   Authorization: Bearer &lt;JWT_token&gt;
+        ///   Content-Type: application/json
+        ///   {
+        ///     "fullName": "PT1",
+        ///     "dob": "1988-03-20",
+        ///     "weight": 60.0,
+        ///     "height": 165.0,
+        ///     "goalTraining": "Tăng cơ",
+        ///     "experience": 7,
+        ///     "gender": "Female"
+        ///   }
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Cập nhật hồ sơ PT thành công. Trả về `BaseResponse&lt;GetPTResponse&gt;` chứa thông tin PT đã cập nhật.
+        ///   - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        ///   - `404 NotFound`: Không tìm thấy hồ sơ PT.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Cập nhật hồ sơ PT thành công",
+        ///     "data": {
+        ///       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///       "fullName": "PT1",
+        ///       "dob": "1988-03-20",
+        ///       "weight": 60.0,
+        ///       "height": 165.0,
+        ///       "goalTraining": "Tăng cơ",
+        ///       "experience": 7,
+        ///       "gender": "Female"
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="request">Thông tin cần cập nhật cho hồ sơ PT, các trường `null` giữ nguyên giá trị cũ.</param>
+        /// <returns>
+        /// - `200 OK`: Cập nhật hồ sơ PT thành công.
+        /// - `401 Unauthorized`: Không cung cấp token hợp lệ.
+        /// - `404 NotFound`: Không tìm thấy hồ sơ PT.
+        /// </returns>
+        /// <response code="200">Trả về thông tin PT đã cập nhật khi yêu cầu thành công.</response>
+        /// <response code="401">Trả về lỗi nếu không cung cấp token hợp lệ.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy hồ sơ PT.</response>
         [HttpPut(ApiEndPointConstant.PT.UpdatePT)]
-        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> UpdatePT([FromBody] UpdatePTRequest request)
         {
@@ -205,6 +298,45 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+        /// <summary>
+        /// API lấy thông tin chi tiết huấn luyện viên cá nhân (PT) theo ID.
+        /// </summary>
+        /// <remarks>
+        /// - API này trả về thông tin chi tiết của PT dựa trên `id` cung cấp, bao gồm họ tên, ngày sinh, cân nặng, chiều cao, mục tiêu tập luyện, kinh nghiệm, và giới tính.
+        /// - API không yêu cầu xác thực (công khai cho người dùng).
+        /// - API dùng để người dùng xem chi tiết PT (ví dụ: để chọn PT phù hợp).
+        /// - Ví dụ yêu cầu:
+        ///   ```
+        ///   GET /api/v1/pt/3fa85f64-5717-4562-b3fc-2c963f66afa6
+        ///   ```
+        /// - Kết quả trả về:
+        ///   - `200 OK`: Lấy thông tin PT thành công. Trả về `BaseResponse&lt;GetPTResponse&gt;` chứa thông tin PT.
+        ///   - `404 NotFound`: Không tìm thấy PT với `id` cung cấp.
+        /// - Ví dụ phản hồi thành công (200 OK):
+        ///   ```json
+        ///   {
+        ///     "status": "200",
+        ///     "message": "Lấy thông tin PT thành công",
+        ///     "data": {
+        ///       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        ///       "fullName": "PT1",
+        ///       "dob": "1988-03-20",
+        ///       "weight": 60.0,
+        ///       "height": 165.0,
+        ///       "goalTraining": "Tăng cơ",
+        ///       "experience": 7,
+        ///       "gender": "Female"
+        ///     }
+        ///   }
+        ///   ```
+        /// </remarks>
+        /// <param name="id">ID của PT cần lấy thông tin.</param>
+        /// <returns>
+        /// - `200 OK`: Lấy thông tin PT thành công.
+        /// - `404 NotFound`: Không tìm thấy PT.
+        /// </returns>
+        /// <response code="200">Trả về thông tin chi tiết PT khi yêu cầu thành công.</response>
+        /// <response code="404">Trả về lỗi nếu không tìm thấy PT.</response>
         [HttpGet(ApiEndPointConstant.PT.GetPT)]
         [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status404NotFound)]
