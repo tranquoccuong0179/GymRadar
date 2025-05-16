@@ -215,6 +215,30 @@ namespace GymRadar.Service.Implement
             };
         }
 
+        public async Task<BaseResponse<GetPTResponse>> GetPT(Guid id)
+        {
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                selector: pt => _mapper.Map<GetPTResponse>(pt),
+                predicate: pt => pt.Id.Equals(id) && pt.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<GetPTResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy PT",
+                    data = null
+                };
+            }
+
+            return new BaseResponse<GetPTResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy thông tin PT thành công",
+                data = pt
+            };
+        }
+
         public async Task<BaseResponse<GetPTResponse>> UpdatePT(UpdatePTRequest request)
         {
             Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
@@ -259,8 +283,7 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Cập nhật thành công",
                 data = _mapper.Map<GetPTResponse>(pt)
-            }
-            throw new NotImplementedException();
+            };
         }
     }
 }

@@ -204,5 +204,15 @@ namespace GymRadar.API.Controllers
             var response = await _ptService.UpdatePT(request);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpGet(ApiEndPointConstant.PT.GetPT)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTResponse>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetPT([FromRoute] Guid id)
+        {
+            var response = await _ptService.GetPT(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }
