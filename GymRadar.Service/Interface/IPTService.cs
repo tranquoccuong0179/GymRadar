@@ -16,6 +16,7 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPT(int page, int size);
         Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForAdmin(int page, int size);
         Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForUser(Guid id, int page, int size);
+        Task<BaseResponse<bool>> DeletePT(Guid id);
 
     }
 }

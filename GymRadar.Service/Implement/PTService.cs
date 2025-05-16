@@ -73,6 +73,61 @@ namespace GymRadar.Service.Implement
             };
         }
 
+        public async Task<BaseResponse<bool>> DeletePT(Guid id)
+        {
+            Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(userId) && a.Active == true);
+            if (account == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản",
+                    data = false
+                };
+            }
+
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: g => g.AccountId.Equals(userId) && g.Active == true);
+            if(gym == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym",
+                    data = false
+                };
+            }
+
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: pt => pt.Id.Equals(id) && pt.GymId.Equals(gym.Id) && pt.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy PT",
+                    data = false
+                };
+            }
+
+            pt.Active = false;
+            pt.UpdateAt = TimeUtil.GetCurrentSEATime();
+            pt.DeleteAt = TimeUtil.GetCurrentSEATime();
+
+            _unitOfWork.GetRepository<Pt>().UpdateAsync(pt);
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<bool>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Xóa PT thành công",
+                data = true
+            };
+        }
+
         public async Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPT(int page, int size)
         {
             Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);

@@ -15,5 +15,6 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<CreateNewGymResponse>> CreateNewGym(RegisterAccountGymRequest request);
         Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size);
         Task<BaseResponse<GetGymResponse>> GetGymById(Guid id);
+        Task<BaseResponse<bool>> DeleteGym(Guid id);
     }
 }

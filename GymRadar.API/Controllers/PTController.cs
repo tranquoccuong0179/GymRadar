@@ -183,5 +183,15 @@ namespace GymRadar.API.Controllers
             var response = await _ptService.GetAllPT(pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpDelete(ApiEndPointConstant.PT.DeletePT)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> DeletePT([FromRoute] Guid id)
+        {
+            var response = await _ptService.DeletePT(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }

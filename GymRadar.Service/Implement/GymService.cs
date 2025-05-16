@@ -10,6 +10,7 @@ using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.Gym;
 using GymRadar.Model.Payload.Response.User;
+using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
@@ -43,6 +44,36 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Đăng ký phòng gym thành công",
                 data = response
+            };
+        }
+
+        public async Task<BaseResponse<bool>> DeleteGym(Guid id)
+        {
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: g => g.Id.Equals(id) && g.Active == true);
+
+            if (gym == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym này",
+                    data = false
+                };
+            }
+
+            gym.Active = false;
+            gym.UpdateAt = TimeUtil.GetCurrentSEATime();
+            gym.DeleteAt = TimeUtil.GetCurrentSEATime();
+
+            _unitOfWork.GetRepository<Gym>().UpdateAsync(gym);
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<bool>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Xóa thành công phòng gym này",
+                data = true
             };
         }
 

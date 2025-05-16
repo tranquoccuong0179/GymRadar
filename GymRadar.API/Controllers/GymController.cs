@@ -334,5 +334,15 @@ namespace GymRadar.API.Controllers
             var response = await _courseService.GetAllGymCourseForUser(id, pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpDelete(ApiEndPointConstant.Gym.DeleteGym)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> DeleteGym([FromRoute] Guid id)
+        {
+            var response = await _gymService.DeleteGym(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }
