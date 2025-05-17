@@ -59,6 +59,8 @@ namespace GymRadar.Service.Implement
             user.Gender = request.Gender.HasValue ? request.Gender.GetDescriptionFromEnum() : user.Gender;
             user.Address = string.IsNullOrEmpty(request.Address) ? user.Address : request.Address;
 
+            _unitOfWork.GetRepository<User>().UpdateAsync(user);
+            await _unitOfWork.CommitAsync();
             return new BaseResponse<GetUserResponse>
             {
                 status = StatusCodes.Status200OK.ToString(),
