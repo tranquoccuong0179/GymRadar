@@ -75,5 +75,10 @@ namespace GymRadar.API.Constant
             public const string UpdateUser = UserEndPoint;
         }
 
+        public static class PTSlot
+        {
+            public const string PTSlotEndPoint = ApiEndpoint + "/pt-slot";
+            public const string CreatePTSlot = PTSlotEndPoint;
+        }
     }
 }

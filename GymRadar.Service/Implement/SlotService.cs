@@ -54,16 +54,57 @@ namespace GymRadar.Service.Implement
                 };
             }
 
-            var slot = _mapper.Map<Slot>(request);
-            slot.GymId = gym.Id;
-            await _unitOfWork.GetRepository<Slot>().InsertAsync(slot);
+            var existingSlotByName = await _unitOfWork.GetRepository<Slot>().SingleOrDefaultAsync(
+                predicate: s => s.GymId.Equals(gym.Id) && s.Name.Equals(request.Name) && s.Active == true);
+
+            if (existingSlotByName != null)
+            {
+                return new BaseResponse<CreateNewSlotResponse>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = "Tên slot đã tồn tại",
+                    data = null
+                };
+            }
+
+            var isExactTimeMatch = await _unitOfWork.GetRepository<Slot>().SingleOrDefaultAsync(
+                predicate: s => s.GymId.Equals(gym.Id) && s.Active == true &&
+                       s.StartTime == request.StartTime && s.EndTime == request.EndTime);
+
+            if (isExactTimeMatch != null)
+            {
+                return new BaseResponse<CreateNewSlotResponse>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = $"Khung giờ {request.StartTime} - {request.EndTime} đã tồn tại trong slot {isExactTimeMatch.Name}",
+                    data = null
+                };
+            }
+
+            var isTimeConflict = await _unitOfWork.GetRepository<Slot>().SingleOrDefaultAsync(
+                predicate: s => s.GymId.Equals(gym.Id) && s.Active == true &&
+                               request.StartTime < s.EndTime && request.EndTime > s.StartTime);
+
+            if (isTimeConflict != null)
+            {
+                return new BaseResponse<CreateNewSlotResponse>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = $"Khoảng thời gian từ {request.StartTime} đến {request.EndTime} bị trùng với slot {isTimeConflict.Name} ({isTimeConflict.StartTime} - {isTimeConflict.EndTime})",
+                    data = null
+                };
+            }
+
+            var newSlot = _mapper.Map<Slot>(request);
+            newSlot.GymId = gym.Id;
+            await _unitOfWork.GetRepository<Slot>().InsertAsync(newSlot);
             await _unitOfWork.CommitAsync();
 
             return new BaseResponse<CreateNewSlotResponse>
             {
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Tạo slot thành công",
-                data = _mapper.Map<CreateNewSlotResponse>(slot)
+                data = _mapper.Map<CreateNewSlotResponse>(newSlot)
             };
         }
 

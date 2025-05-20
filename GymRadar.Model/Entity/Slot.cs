@@ -24,4 +24,6 @@ public partial class Slot
     public Guid? GymId { get; set; }
 
     public virtual Gym? Gym { get; set; }
+
+    public virtual ICollection<Ptslot> Ptslots { get; set; } = new List<Ptslot>();
 }
