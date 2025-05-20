@@ -148,6 +148,10 @@ public partial class GymRadarContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.StartTime).HasPrecision(0);
             entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Gym).WithMany(p => p.Slots)
+                .HasForeignKey(d => d.GymId)
+                .HasConstraintName("FK_Slot_Gym");
         });
 
         modelBuilder.Entity<User>(entity =>

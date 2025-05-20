@@ -30,6 +30,7 @@ namespace GymRadar.API.Controllers
         /// - Ví dụ yêu cầu:
         ///   ```
         ///   POST /api/v1/pt
+        ///   Authorization: Bearer &lt;JWT_token&gt;
         ///   ```
         /// - Ví dụ nội dung yêu cầu:
         ///   ```json

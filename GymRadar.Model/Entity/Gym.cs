@@ -40,4 +40,6 @@ public partial class Gym
     public virtual ICollection<GymCourse> GymCourses { get; set; } = new List<GymCourse>();
 
     public virtual ICollection<Pt> Pts { get; set; } = new List<Pt>();
+
+    public virtual ICollection<Slot> Slots { get; set; } = new List<Slot>();
 }

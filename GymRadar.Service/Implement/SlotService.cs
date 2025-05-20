@@ -26,8 +26,36 @@ namespace GymRadar.Service.Implement
 
         public async Task<BaseResponse<CreateNewSlotResponse>> CreateSlot(CreateNewSlotRequest request)
         {
-            var slot = _mapper.Map<Slot>(request);
+            Guid? userId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
 
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(userId) && a.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<CreateNewSlotResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản",
+                    data = null
+                };
+            }
+
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: g => g.AccountId.Equals(userId) && g.Active == true);
+
+            if (gym == null)
+            {
+                return new BaseResponse<CreateNewSlotResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy phòng gym",
+                    data = null
+                };
+            }
+
+            var slot = _mapper.Map<Slot>(request);
+            slot.GymId = gym.Id;
             await _unitOfWork.GetRepository<Slot>().InsertAsync(slot);
             await _unitOfWork.CommitAsync();
 

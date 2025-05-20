@@ -20,4 +20,8 @@ public partial class Slot
     public DateTime? UpdateAt { get; set; }
 
     public DateTime? DeleteAt { get; set; }
+
+    public Guid? GymId { get; set; }
+
+    public virtual Gym? Gym { get; set; }
 }

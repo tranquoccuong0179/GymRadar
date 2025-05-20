@@ -25,9 +25,11 @@ namespace GymRadar.API.Controllers
         /// </summary>
         /// <remarks>
         /// - API này cho phép tạo một khung giờ mới với thông tin như tên, thời gian bắt đầu và kết thúc.
+        /// - Yêu cầu xác thực (bearer token) để lấy thông tin tài khoản người tạo (chủ phòng gym).
         /// - Ví dụ yêu cầu:
         ///   ```
         ///   POST /api/v1/slot
+        ///   Authorization: Bearer &lt;JWT_token&gt;
         ///   Content-Type: application/json
         ///   {
         ///     "name": "Slot 1",
