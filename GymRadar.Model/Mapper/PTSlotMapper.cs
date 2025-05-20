@@ -22,6 +22,9 @@ namespace GymRadar.Model.Mapper
                 .ForMember(dest => dest.UpdateAt, opt => opt.MapFrom(src => TimeUtil.GetCurrentSEATime()));
 
             CreateMap<Ptslot, CreatePTSlotResponse>();
+
+            CreateMap<Ptslot, GetPTSlotResponse>()
+                .ForMember(dest => dest.Slot, opt => opt.MapFrom(src => src.Slot));
         }
     }
 }
