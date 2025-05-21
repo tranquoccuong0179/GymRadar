@@ -83,5 +83,13 @@ namespace GymRadar.API.Constant
             public const string ActivePTSlot = PTSlotEndPoint + "/{id}/active";
             public const string UnActivePTSlot = PTSlotEndPoint + "/{id}/un-active";
         }
+
+        public static class GymCoursePT
+        {
+            public const string GymCoursePTEndPoint = ApiEndpoint + "/course-pt";
+            public const string CreateGymCoursePT = GymCoursePTEndPoint;
+            public const string GetGymCoursePT = GymCoursePTEndPoint + "/{id}";
+            public const string GetAllGymCoursePT = GymCoursePTEndPoint + "/{id}/gym-course";
+        }
     }
 }
