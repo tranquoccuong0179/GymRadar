@@ -11,5 +11,6 @@ namespace GymRadar.Model.Payload.Response.PTSlot
     {
         public Guid Id { get; set; }
         public GetSlotResponse? Slot { get; set; }
+        public bool? Active { get; set; }
     }
 }

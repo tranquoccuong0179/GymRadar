@@ -23,6 +23,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<GymCourse> GymCourses { get; set; }
 
+    public virtual DbSet<GymCoursePt> GymCoursePts { get; set; }
+
     public virtual DbSet<Pt> Pts { get; set; }
 
     public virtual DbSet<Ptslot> Ptslots { get; set; }
@@ -112,6 +114,27 @@ public partial class GymRadarContext : DbContext
                 .HasForeignKey(d => d.GymId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GymCourse_Gym");
+        });
+
+        modelBuilder.Entity<GymCoursePt>(entity =>
+        {
+            entity.ToTable("GymCoursePT");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.Ptid).HasColumnName("PTId");
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.GymCourse).WithMany(p => p.GymCoursePts)
+                .HasForeignKey(d => d.GymCourseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GymCoursePT_GymCourse");
+
+            entity.HasOne(d => d.Pt).WithMany(p => p.GymCoursePts)
+                .HasForeignKey(d => d.Ptid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GymCoursePT_PT_1");
         });
 
         modelBuilder.Entity<Pt>(entity =>

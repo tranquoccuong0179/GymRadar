@@ -123,6 +123,19 @@ namespace GymRadar.Service.Implement
                 };
             }
 
+            var existingPtSlot = await _unitOfWork.GetRepository<Ptslot>().SingleOrDefaultAsync(
+                predicate: ps => ps.Ptid.Equals(pt.Id) && ps.SlotId.Equals(request.SlotId));
+
+            if (existingPtSlot != null)
+            {
+                return new BaseResponse<CreatePTSlotResponse>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = "PT đã đăng ký khung giờ này rồi",
+                    data = null
+                };
+            }
+
             var ptSlot = _mapper.Map<Ptslot>(request);
             ptSlot.Ptid = pt.Id;
 
@@ -224,7 +237,7 @@ namespace GymRadar.Service.Implement
                 };
             }
 
-            ptSlot.Active = true;
+            ptSlot.Active = false;
             ptSlot.UpdateAt = TimeUtil.GetCurrentSEATime();
 
             _unitOfWork.GetRepository<Ptslot>().UpdateAsync(ptSlot);
