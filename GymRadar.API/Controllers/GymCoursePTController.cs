@@ -29,8 +29,8 @@ namespace GymRadar.API.Controllers
         }
 
         [HttpGet(ApiEndPointConstant.GymCoursePT.GetAllGymCoursePT)]
-        [ProducesResponseType(typeof(BaseResponse<IPaginate<CreateGymCoursePTResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseResponse<IPaginate<CreateGymCoursePTResponse>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetGymCoursePTResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetGymCoursePTResponse>>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
         public async Task<IActionResult> GetAllGymCoursePT([FromRoute] Guid id, [FromQuery] int? page, [FromQuery] int? size) 
         {
