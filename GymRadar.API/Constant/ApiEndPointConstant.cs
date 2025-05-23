@@ -58,6 +58,7 @@ namespace GymRadar.API.Constant
             public const string GymCourseEndPoint = ApiEndpoint + "/course";
             public const string CreateGymCourse = GymCourseEndPoint;
             public const string GetAllGymCourse = GymCourseEndPoint;
+            public const string GetAllPTForGymCourse = GymCourseEndPoint + "/{id}/pts";
         }
 
         public static class Slot
@@ -90,6 +91,12 @@ namespace GymRadar.API.Constant
             public const string CreateGymCoursePT = GymCoursePTEndPoint;
             public const string GetGymCoursePT = GymCoursePTEndPoint + "/{id}";
             public const string GetAllGymCoursePT = GymCoursePTEndPoint + "/{id}/gym-course";
+        }
+
+        public static class Cart
+        {
+            public const string CartEndPoint = ApiEndpoint + "/cart";
+            public const string CreateQR = CartEndPoint;
         }
     }
 }

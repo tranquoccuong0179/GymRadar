@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Text.Json;
 using GymRadar.API;
 using GymRadar.API.Constant;
@@ -6,6 +6,9 @@ using GymRadar.Model.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using GymRadar.Model.Payload.Response.PayOS;
+using Microsoft.Extensions.Options;
+using Net.payOS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,7 +95,12 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-
+builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddScoped<PayOS>(sp =>
+{
+    var payOSSettings = sp.GetRequiredService<IOptions<PayOSSettings>>().Value;
+    return new PayOS(payOSSettings.ClientId, payOSSettings.ApiKey, payOSSettings.ChecksumKey);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

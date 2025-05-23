@@ -14,6 +14,7 @@ using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymRadar.Service.Implement
@@ -132,6 +133,45 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Lấy danh sách khóa tập thành công",
                 data = gymCourses
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForGymCourse(Guid id, int page, int size)
+        {
+            var gymCourse = await _unitOfWork.GetRepository<GymCourse>().SingleOrDefaultAsync(
+                predicate: gc => gc.Id.Equals(id) && gc.Active == true);
+
+            if (gymCourse == null)
+            {
+                return new BaseResponse<IPaginate<GetPTResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy gói tập của phòng gym",
+                    data = null
+                };
+            }
+
+            var ptQuery = await _unitOfWork.GetRepository<GymCoursePt>()
+                .GetPagingListAsync(
+                    predicate: gcp => gcp.GymCourseId.Equals(id) && gcp.Active == true,
+                    include: source => source.Include(gcp => gcp.Pt),
+                    page: page,
+                    size: size);
+
+            var pts = _mapper.Map<IEnumerable<GetPTResponse>>(ptQuery.Items.Select(gcp => gcp.Pt)).ToList();
+
+            return new BaseResponse<IPaginate<GetPTResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách PT thành công",
+                data = new Paginate<GetPTResponse>
+                {
+                    Items = pts,
+                    Page = page,
+                    Size = size,
+                    Total = ptQuery.Total,
+                    TotalPages = ptQuery.TotalPages
+                }
             };
         }
     }

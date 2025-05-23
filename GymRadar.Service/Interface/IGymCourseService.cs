@@ -16,5 +16,6 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<CreateGymCourseResponse>> CreateNewGymCourse(CreateGymCourseRequest request);
         Task<BaseResponse<IPaginate<GetGymCourseResponse>>> GetAllGymCourse(int page, int size);
         Task<BaseResponse<IPaginate<GetGymCourseResponse>>> GetAllGymCourseForUser(Guid id, int page, int size);
+        Task<BaseResponse<IPaginate<GetPTResponse>>> GetAllPTForGymCourse(Guid id, int page, int size);
     }
 }

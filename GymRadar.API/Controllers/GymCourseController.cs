@@ -10,6 +10,7 @@ using GymRadar.Model.Payload.Request.GymCourse;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.GymCourse;
 using Microsoft.AspNetCore.Authorization;
+using GymRadar.Model.Payload.Response.PT;
 
 namespace GymRadar.API.Controllers
 {
@@ -157,6 +158,17 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _gymCourseService.GetAllGymCourse(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.GymCourse.GetAllPTForGymCourse)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetPTResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetPTResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAllPTForGymCourse([FromRoute] Guid id, [FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _gymCourseService.GetAllPTForGymCourse(id, pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
     }
