@@ -34,7 +34,7 @@ namespace GymRadar.Service.Implement
             _payOS = payOS;
         }
 
-        public async Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(CreateQRRequest request)
+        public async Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(List<CreateQRRequest> request)
         {
             Guid? id = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
             var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
@@ -63,18 +63,22 @@ namespace GymRadar.Service.Implement
                 };
             }
 
-            var gymCourse = await _unitOfWork.GetRepository<GymCourse>().SingleOrDefaultAsync(
-                predicate: gc => gc.Id.Equals(request.GymCourseId) && gc.Active == true);
+            var allGymCourseIds = request.Select(r => r.GymCourseId).Distinct().ToList();
 
-            if(gymCourse == null)
+            var gymCourses = await _unitOfWork.GetRepository<GymCourse>().GetListAsync(
+                predicate: gc => allGymCourseIds.Contains(gc.Id) && gc.Active == true);
+
+            if (gymCourses == null || gymCourses.Count == 0 || gymCourses.Count != allGymCourseIds.Count)
             {
                 return new BaseResponse<CreatePaymentResult>
                 {
                     status = StatusCodes.Status404NotFound.ToString(),
-                    message = "Không tìm thấy khóa tập",
+                    message = "Một hoặc nhiều khóa tập không tồn tại hoặc không hoạt động",
                     data = null
                 };
             }
+
+            double totalPrice = gymCourses.Sum(gc => gc.Price);
 
             string buyerName = user.FullName;
             string buyerPhone = account.Phone;
@@ -85,7 +89,7 @@ namespace GymRadar.Service.Implement
             var description = "GymRadarQR";
             var signatureData = new Dictionary<string, object>
                 {
-                    { "amount", gymCourse.Price },
+                    { "amount", totalPrice },
                     { "cancelUrl", _payOSSettings.ReturnUrlFail },
                     { "description", description },
                     { "expiredAt", DateTimeOffset.Now.AddMinutes(10).ToUnixTimeSeconds() },
@@ -101,7 +105,7 @@ namespace GymRadar.Service.Implement
 
             var paymentData = new PaymentData(
                 orderCode: orderCode,
-                amount: (int)gymCourse.Price,
+                amount: (int)totalPrice,
                 description: description,
                 items: null,
                 cancelUrl: _payOSSettings.ReturnUrlFail,

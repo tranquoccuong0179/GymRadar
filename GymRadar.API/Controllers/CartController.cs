@@ -20,7 +20,7 @@ namespace GymRadar.API.Controllers
         [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status400BadRequest)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
-        public async Task<IActionResult> CreateQR([FromBody] CreateQRRequest request)
+        public async Task<IActionResult> CreateQR([FromBody] List<CreateQRRequest> request)
         {
             var response = await _cartService.CreatePaymentUrlRegisterCreator(request);
             return StatusCode(int.Parse(response.status), response);
