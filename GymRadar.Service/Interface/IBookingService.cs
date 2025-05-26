@@ -21,6 +21,8 @@ namespace GymRadar.Service.Interface
 
         Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForAdmin(int page, int size);
 
+        Task<BaseResponse<GetBookingResponse>> GetBookingById(Guid id);
+
         Task<BaseResponse<bool>> UpdateBooking(Guid id, StatusBookingEnum status);
     }
 }

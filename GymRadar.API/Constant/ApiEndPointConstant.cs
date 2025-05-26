@@ -107,6 +107,7 @@ namespace GymRadar.API.Constant
             public const string GetBookingForUser = BookingEndPoint + "/user";
             public const string GetBookingForPT = BookingEndPoint + "/pt";
             public const string UpdateBooking = BookingEndPoint + "/{id}";
+            public const string GetBooking = BookingEndPoint + "/{id}";
         }
     }
 }

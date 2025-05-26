@@ -54,6 +54,17 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+        [HttpGet(ApiEndPointConstant.Booking.GetBooking)]
+        [ProducesResponseType(typeof(BaseResponse<GetBookingResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetBookingResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<GetBookingResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetBooking([FromRoute] Guid id)
+        {
+            var response = await _bookingService.GetBookingById(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
         [HttpPut(ApiEndPointConstant.Booking.UpdateBooking)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]

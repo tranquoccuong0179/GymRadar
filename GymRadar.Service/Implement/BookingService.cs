@@ -100,6 +100,24 @@ namespace GymRadar.Service.Implement
             };
         }
 
+        public async Task<BaseResponse<GetBookingResponse>> GetBookingById(Guid id)
+        {
+            var booking = await _unitOfWork.GetRepository<Booking>().SingleOrDefaultAsync(
+                selector: b => _mapper.Map<GetBookingResponse>(b),
+                predicate: b => b.Id.Equals(id) && b.Active == true,
+                include: b => b.Include(b => b.User)
+                               .Include(b => b.PtSlot)
+                               .ThenInclude(pts => pts.Pt)
+                               .Include(b => b.PtSlot.Slot));
+
+            return new BaseResponse<GetBookingResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy thông tin đặt lịch thành công",
+                data = booking
+            };
+        }
+
         public async Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForAdmin(int page, int size)
         {
             var bookings = await _unitOfWork.GetRepository<Booking>().GetPagingListAsync(
