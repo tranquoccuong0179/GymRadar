@@ -21,6 +21,8 @@ public partial class Booking
 
     public DateTime? DeleteAt { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Ptslot? PtSlot { get; set; }
 
     public virtual User? User { get; set; }

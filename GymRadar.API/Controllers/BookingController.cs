@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Payload.Request.Booking;
 using GymRadar.Model.Payload.Response.Booking;
 using GymRadar.Model.Paginate;
+using GymRadar.Model.Enum;
 
 namespace GymRadar.API.Controllers
 {
@@ -38,6 +39,29 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _bookingService.GetBookingForUser(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.Booking.GetBookingForPT)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetBookingResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetBookingResponse>>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetBookingForPT([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _bookingService.GetBookingForPT(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpPut(ApiEndPointConstant.Booking.UpdateBooking)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, [FromQuery] StatusBookingEnum status)
+        {
+            var response = await _bookingService.UpdateBooking(id, status);
             return StatusCode(int.Parse(response.status), response);
         }
     }

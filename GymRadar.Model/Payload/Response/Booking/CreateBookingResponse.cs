@@ -12,5 +12,6 @@ namespace GymRadar.Model.Payload.Response.Booking
 
         public DateOnly? Date { get; set; }
 
+        public string? Status { get; set; }
     }
 }

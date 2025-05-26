@@ -4,15 +4,19 @@ using GymRadar.Model.Payload.Response;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Paginate;
+using GymRadar.Model.Payload.Response.Booking;
+using GymRadar.Service.Implement;
 
 namespace GymRadar.API.Controllers
 {
     public class AdminController : BaseController<AdminController>
     {
         private readonly IPTService _ptService;
-        public AdminController(ILogger<AdminController> logger, IPTService ptService) : base(logger)
+        private readonly IBookingService _bookingService;
+        public AdminController(ILogger<AdminController> logger, IPTService ptService, IBookingService bookingService) : base(logger)
         {
             _ptService = ptService;
+            _bookingService = bookingService;
         }
 
         /// <summary>
@@ -80,6 +84,18 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _ptService.GetAllPTForAdmin(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.Admin.GetAllBooking)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetBookingResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetBookingResponse>>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllBookingForAdmin([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _bookingService.GetBookingForAdmin(pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
     }

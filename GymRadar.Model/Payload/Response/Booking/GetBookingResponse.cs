@@ -15,6 +15,8 @@ namespace GymRadar.Model.Payload.Response.Booking
 
         public DateOnly? Date { get; set; }
 
+        public string? Status { get; set; }
+
         public GetUserResponse? User {  get; set; }
         
         public GetPTResponse? PT { get; set; }

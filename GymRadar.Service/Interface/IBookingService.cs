@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GymRadar.Model.Enum;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.Booking;
 using GymRadar.Model.Payload.Response;
@@ -17,5 +18,9 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForUser(int page, int size);
 
         Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForPT(int page, int size);
+
+        Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForAdmin(int page, int size);
+
+        Task<BaseResponse<bool>> UpdateBooking(Guid id, StatusBookingEnum status);
     }
 }

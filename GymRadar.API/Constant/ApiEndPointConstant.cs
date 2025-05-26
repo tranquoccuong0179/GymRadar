@@ -51,6 +51,7 @@ namespace GymRadar.API.Constant
             public const string AdminEndPoint = ApiEndpoint + "/admin";
             public const string CreateAdmin = AdminEndPoint;
             public const string GetAllPT = AdminEndPoint + "/get-pt";
+            public const string GetAllBooking = AdminEndPoint + "/booking";
         }
 
         public static class GymCourse
@@ -104,6 +105,8 @@ namespace GymRadar.API.Constant
             public const string BookingEndPoint = ApiEndpoint + "/booking";
             public const string CreateBooking = BookingEndPoint;
             public const string GetBookingForUser = BookingEndPoint + "/user";
+            public const string GetBookingForPT = BookingEndPoint + "/pt";
+            public const string UpdateBooking = BookingEndPoint + "/{id}";
         }
     }
 }

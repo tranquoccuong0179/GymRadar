@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Enum;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.Booking;
 using GymRadar.Model.Payload.Response;
@@ -99,9 +100,78 @@ namespace GymRadar.Service.Implement
             };
         }
 
-        public Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForPT(int page, int size)
+        public async Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForAdmin(int page, int size)
         {
-            throw new NotImplementedException();
+            var bookings = await _unitOfWork.GetRepository<Booking>().GetPagingListAsync(
+                selector: b => _mapper.Map<GetBookingResponse>(b),
+                predicate: b => b.Active == true,
+                include: b => b.Include(b => b.User)
+                               .Include(b => b.PtSlot)
+                               .ThenInclude(pts => pts.Pt)
+                               .Include(b => b.PtSlot.Slot),
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetBookingResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách đặt lịch cho PT thành công",
+                data = bookings
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForPT(int page, int size)
+        {
+            Guid? accountId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(accountId) && a.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<IPaginate<GetBookingResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản người dùng",
+                    data = null
+                };
+            }
+
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: p => p.AccountId.Equals(accountId) && p.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<IPaginate<GetBookingResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy thông tin của PT",
+                    data = null
+                };
+            }
+
+            var ptSlots = await _unitOfWork.GetRepository<Ptslot>().GetListAsync(
+                predicate: pts => pts.Ptid.Equals(pt.Id) && pts.Active == true);
+
+            var ptSlotIds = ptSlots.Select(pts => pts.Id).ToList();
+
+            var bookings = await _unitOfWork.GetRepository<Booking>().GetPagingListAsync(
+                selector: b => _mapper.Map<GetBookingResponse>(b),
+                predicate: b => ptSlotIds.Contains(b.PtSlotId.Value) && b.Active == true,
+                include: b => b.Include(b => b.User)
+                               .Include(b => b.PtSlot)
+                               .ThenInclude(pts => pts.Pt)
+                               .Include(b => b.PtSlot.Slot),
+                page: page,
+                size: size);
+
+
+            return new BaseResponse<IPaginate<GetBookingResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách đặt lịch cho PT thành công",
+                data = bookings
+            };
         }
 
         public async Task<BaseResponse<IPaginate<GetBookingResponse>>> GetBookingForUser(int page, int size)
@@ -149,6 +219,63 @@ namespace GymRadar.Service.Implement
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Lấy danh sách đặt lịch cho người dùng thành công",
                 data = bookings
+            };
+        }
+
+        public async Task<BaseResponse<bool>> UpdateBooking(Guid id, StatusBookingEnum status)
+        {
+            Guid? accountId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(accountId) && a.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản người dùng",
+                    data = false
+                };
+            }
+
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: p => p.AccountId.Equals(accountId) && p.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy thông tin của PT",
+                    data = false
+                };
+            }
+
+            var booking = await _unitOfWork.GetRepository<Booking>().SingleOrDefaultAsync(
+                predicate: b => b.Id.Equals(id) && b.Active == true && b.PtSlot.Ptid.Equals(pt.Id),
+                include: b => b.Include(b => b.PtSlot).ThenInclude(pts => pts.Pt));
+            if (booking == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy thông tin đặt lịch hoặc không phải của PT này",
+                    data = false
+                };
+            }
+
+            booking.Status = status.GetDescriptionFromEnum();
+            booking.UpdateAt = TimeUtil.GetCurrentSEATime();
+
+            _unitOfWork.GetRepository<Booking>().UpdateAsync(booking);
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<bool>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Cập nhật trạng thái đặt lịch thành công",
+                data = true
             };
         }
     }
