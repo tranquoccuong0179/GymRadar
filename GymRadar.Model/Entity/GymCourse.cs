@@ -32,4 +32,6 @@ public partial class GymCourse
     public virtual Gym Gym { get; set; } = null!;
 
     public virtual ICollection<GymCoursePt> GymCoursePts { get; set; } = new List<GymCoursePt>();
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

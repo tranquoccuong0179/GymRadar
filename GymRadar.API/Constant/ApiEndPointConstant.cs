@@ -98,5 +98,12 @@ namespace GymRadar.API.Constant
             public const string CartEndPoint = ApiEndpoint + "/cart";
             public const string CreateQR = CartEndPoint;
         }
+
+        public static class Booking
+        {
+            public const string BookingEndPoint = ApiEndpoint + "/booking";
+            public const string CreateBooking = BookingEndPoint;
+            public const string GetBookingForUser = BookingEndPoint + "/user";
+        }
     }
 }

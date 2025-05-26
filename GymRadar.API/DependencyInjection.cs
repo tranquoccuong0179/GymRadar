@@ -35,6 +35,7 @@ namespace GymRadar.API
             services.AddScoped<IPTSlotService, PTSlotService>();
             services.AddScoped<IGymCoursePTService, GymCoursePTService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IBookingService, BookingService>();
             return services;
         }
         public static IServiceCollection AddHttpClientServices(this IServiceCollection services)

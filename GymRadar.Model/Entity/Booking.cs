@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace GymRadar.Model.Entity;
 
-public partial class Ptslot
+public partial class Booking
 {
     public Guid Id { get; set; }
 
-    public Guid SlotId { get; set; }
+    public Guid? UserId { get; set; }
 
-    public Guid Ptid { get; set; }
+    public Guid? PtSlotId { get; set; }
+
+    public DateOnly? Date { get; set; }
 
     public bool? Active { get; set; }
 
@@ -19,9 +21,7 @@ public partial class Ptslot
 
     public DateTime? DeleteAt { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public virtual Ptslot? PtSlot { get; set; }
 
-    public virtual Pt Pt { get; set; } = null!;
-
-    public virtual Slot Slot { get; set; } = null!;
+    public virtual User? User { get; set; }
 }

@@ -19,6 +19,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<Admin> Admins { get; set; }
 
+    public virtual DbSet<Booking> Bookings { get; set; }
+
     public virtual DbSet<Gym> Gyms { get; set; }
 
     public virtual DbSet<GymCourse> GymCourses { get; set; }
@@ -31,11 +33,13 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<Slot> Slots { get; set; }
 
+    public virtual DbSet<Transaction> Transactions { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=14.225.220.28;Database=GymRadar;User Id=sa;Password=0363919179aN;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=14.225.253.29;Database=GymRadar;User Id=sa;Password=winnertech123@;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -74,6 +78,24 @@ public partial class GymRadarContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Admins)
                 .HasForeignKey(d => d.AccountId)
                 .HasConstraintName("FK_Admin_Account");
+        });
+
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.ToTable("Booking");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.PtSlot).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.PtSlotId)
+                .HasConstraintName("FK_Booking_PTSlot");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Booking_User");
         });
 
         modelBuilder.Entity<Gym>(entity =>
@@ -198,6 +220,27 @@ public partial class GymRadarContext : DbContext
             entity.HasOne(d => d.Gym).WithMany(p => p.Slots)
                 .HasForeignKey(d => d.GymId)
                 .HasConstraintName("FK_Slot_Gym");
+        });
+
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.ToTable("Transaction");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Description).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
+
+            entity.HasOne(d => d.GymCourse).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.GymCourseId)
+                .HasConstraintName("FK_Transaction_GymCourse_1");
+
+            entity.HasOne(d => d.Pt).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.PtId)
+                .HasConstraintName("FK_Transaction_PT_2");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Transaction_User");
         });
 
         modelBuilder.Entity<User>(entity =>
