@@ -7,6 +7,7 @@ using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Payload.Response.PTSlot;
 using GymRadar.Model.Payload.Request.PTSlot;
+using System.ComponentModel.DataAnnotations;
 
 namespace GymRadar.API.Controllers
 {
@@ -30,14 +31,22 @@ namespace GymRadar.API.Controllers
         }
 
         [HttpGet(ApiEndPointConstant.PTSlot.GetAllPTSlot)]
-        [ProducesResponseType(typeof(BaseResponse<CreatePTSlotResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseResponse<CreatePTSlotResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTSlot>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTSlot>), StatusCodes.Status404NotFound)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
-        public async Task<IActionResult> GetAllPTSlot([FromQuery] int? page, [FromQuery] int? size)
+        public async Task<IActionResult> GetAllPTSlot([FromQuery, Required] DateOnly date)
         {
-            int pageNumber = page ?? 1;
-            int pageSize = size ?? 10;
-            var response = await _ptSlotService.GetPTSlot(pageNumber, pageSize);
+            var response = await _ptSlotService.GetPTSlot(date);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.PTSlot.GetAllPTSlotForUser)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTSlot>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetPTSlot>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllPTSlotForUser([FromRoute] Guid id, [FromQuery, Required] DateOnly date)
+        {
+            var response = await _ptSlotService.GetPTSlotForUser(id, date);
             return StatusCode(int.Parse(response.status), response);
         }
 

@@ -10,7 +10,18 @@ namespace GymRadar.Model.Payload.Response.PTSlot
     public class GetPTSlotResponse
     {
         public Guid Id { get; set; }
-        public GetSlotResponse? Slot { get; set; }
         public bool? Active { get; set; }
+        public bool? IsBooking { get; set; }
+        public GetSlotResponse? Slot { get; set; }
     }
+
+    public class GetPTSlot
+    {
+        public Guid Id { get; set; }
+        public string? FullName { get; set; }
+
+        public List<GetPTSlotResponse>? PTSlots { get; set; }
+    }
+
+
 }

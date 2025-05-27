@@ -15,6 +15,7 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<CreatePTSlotResponse>> CreatePTSlot(CreatePTSlotRequest request);
         Task<BaseResponse<bool>> ActiveSlot(Guid id);
         Task<BaseResponse<bool>> UnActiveSlot(Guid id);
-        Task<BaseResponse<IPaginate<GetPTSlotResponse>>> GetPTSlot(int page, int size);
+        Task<BaseResponse<GetPTSlot>> GetPTSlot(DateOnly date);
+        Task<BaseResponse<GetPTSlot>> GetPTSlotForUser(Guid id, DateOnly date);
     }
 }
