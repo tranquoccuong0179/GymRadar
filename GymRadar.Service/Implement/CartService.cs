@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Enum;
 using GymRadar.Model.Payload.Request.Cart;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.PayOS;
@@ -13,6 +14,7 @@ using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Net.payOS;
@@ -34,7 +36,7 @@ namespace GymRadar.Service.Implement
             _payOS = payOS;
         }
 
-        public async Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(List<CreateQRRequest> request)
+        public async Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(CreateQRRequest request)
         {
             Guid? id = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
             var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
@@ -63,22 +65,55 @@ namespace GymRadar.Service.Implement
                 };
             }
 
-            var allGymCourseIds = request.Select(r => r.GymCourseId).Distinct().ToList();
+            var gymCourse = await _unitOfWork.GetRepository<GymCourse>().SingleOrDefaultAsync(
+                predicate: gc => gc.Id.Equals(request.GymCourseId) && gc.Active == true,
+                include: gc => gc.Include(gc => gc.Gym));
 
-            var gymCourses = await _unitOfWork.GetRepository<GymCourse>().GetListAsync(
-                predicate: gc => allGymCourseIds.Contains(gc.Id) && gc.Active == true);
-
-            if (gymCourses == null || gymCourses.Count == 0 || gymCourses.Count != allGymCourseIds.Count)
+            if (gymCourse == null)
             {
                 return new BaseResponse<CreatePaymentResult>
                 {
                     status = StatusCodes.Status404NotFound.ToString(),
-                    message = "Một hoặc nhiều khóa tập không tồn tại hoặc không hoạt động",
+                    message = "Không tồn tại khóa học này",
                     data = null
                 };
             }
 
-            double totalPrice = gymCourses.Sum(gc => gc.Price);
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: pt => pt.Id.Equals(request.PTId) && pt.Active == true);
+            if (pt == null)
+            {
+                return new BaseResponse<CreatePaymentResult>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "PT này không tồn tại",
+                    data = null
+                };
+            }
+
+            if (pt.GymId != gymCourse.GymId)
+            {
+                return new BaseResponse<CreatePaymentResult>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = "PT này không thuộc phòng gym này",
+                    data = null
+                };
+            }
+
+            var gymCoursePt = await _unitOfWork.GetRepository<GymCoursePt>().SingleOrDefaultAsync(
+                predicate: gcp => gcp.Ptid.Equals(request.PTId) && gcp.GymCourseId.Equals(request.GymCourseId) && gcp.Active == true);
+
+            if (gymCoursePt == null)
+            {
+                return new BaseResponse<CreatePaymentResult>
+                {
+                    status = StatusCodes.Status400BadRequest.ToString(),
+                    message = "PT này không được liên kết với khóa học này",
+                    data = null
+                };
+            }
+
 
             string buyerName = user.FullName;
             string buyerPhone = account.Phone;
@@ -89,7 +124,7 @@ namespace GymRadar.Service.Implement
             var description = "GymRadarQR";
             var signatureData = new Dictionary<string, object>
                 {
-                    { "amount", totalPrice },
+                    { "amount", gymCourse.Price },
                     { "cancelUrl", _payOSSettings.ReturnUrlFail },
                     { "description", description },
                     { "expiredAt", DateTimeOffset.Now.AddMinutes(10).ToUnixTimeSeconds() },
@@ -105,7 +140,7 @@ namespace GymRadar.Service.Implement
 
             var paymentData = new PaymentData(
                 orderCode: orderCode,
-                amount: (int)totalPrice,
+                amount: (int)gymCourse.Price,
                 description: description,
                 items: null,
                 cancelUrl: _payOSSettings.ReturnUrlFail,
@@ -120,6 +155,20 @@ namespace GymRadar.Service.Implement
             );
 
             var paymentResult = await _payOS.createPaymentLink(paymentData);
+
+            var transaction = new Model.Entity.Transaction
+            {
+                Id = Guid.NewGuid(),
+                Status = StatusTransactionEnum.PENDING.GetDescriptionFromEnum(),
+                Price = gymCourse.Price,
+                OrderCode = orderCode,
+                Description = description,
+                UserId = user.Id,
+                GymCourseId = request.GymCourseId,
+                PtId = request.PTId,
+            };
+            await _unitOfWork.GetRepository<Model.Entity.Transaction>().InsertAsync(transaction);
+            await _unitOfWork.CommitAsync();
 
             return new BaseResponse<CreatePaymentResult>
             {
