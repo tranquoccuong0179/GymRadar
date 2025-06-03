@@ -9,6 +9,7 @@ using GymRadar.Model.Entity;
 using GymRadar.Model.Enum;
 using GymRadar.Model.Payload.Request.Cart;
 using GymRadar.Model.Payload.Response;
+using GymRadar.Model.Payload.Response.Cart;
 using GymRadar.Model.Payload.Response.PayOS;
 using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
@@ -19,6 +20,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Net.payOS;
 using Net.payOS.Types;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace GymRadar.Service.Implement
 {
@@ -26,14 +29,16 @@ namespace GymRadar.Service.Implement
     {
         private readonly PayOS _payOS;
         private readonly PayOSSettings _payOSSettings;
+        private readonly HttpClient _client;
         public CartService(IUnitOfWork<GymRadarContext> unitOfWork
             , ILogger<CartService> logger
             , IMapper mapper
             , IHttpContextAccessor httpContextAccessor
-            , PayOS payOS, IOptions<PayOSSettings> settings) : base(unitOfWork, logger, mapper, httpContextAccessor)
+            , PayOS payOS, IOptions<PayOSSettings> settings, HttpClient client) : base(unitOfWork, logger, mapper, httpContextAccessor)
         {
             _payOSSettings = settings.Value;
             _payOS = payOS;
+            _client = client;
         }
 
         public async Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(CreateQRRequest request)
@@ -166,6 +171,7 @@ namespace GymRadar.Service.Implement
                 UserId = user.Id,
                 GymCourseId = request.GymCourseId,
                 PtId = request.PTId,
+                CreateAt = TimeUtil.GetCurrentSEATime(),
             };
             await _unitOfWork.GetRepository<Model.Entity.Transaction>().InsertAsync(transaction);
             await _unitOfWork.CommitAsync();
@@ -178,6 +184,147 @@ namespace GymRadar.Service.Implement
             };
         }
 
+        public async Task<BaseResponse<TransactionResponse>> GetPaymentStatus(long orderCode)
+        {
+            try
+            {
+                var transaction = await _unitOfWork.GetRepository<Model.Entity.Transaction>()
+                    .SingleOrDefaultAsync(predicate: t => t.OrderCode == orderCode);
+
+                if (transaction == null)
+                {
+                    return new BaseResponse<TransactionResponse>
+                    {
+                        status = StatusCodes.Status404NotFound.ToString(),
+                        message = "Không tìm thấy giao dịch",
+                        data = null
+                    };
+                }
+                var transactionResponse = new TransactionResponse
+                {
+                    Amount = transaction.Price,
+                    Description = transaction.Description,
+                    OrderCode = transaction.OrderCode,
+                    Status = "00"
+                };
+
+                if (transaction.Status == StatusTransactionEnum.COMPLETED.GetDescriptionFromEnum())
+                {
+                    return new BaseResponse<TransactionResponse>
+                    {
+                        status = StatusCodes.Status200OK.ToString(),
+                        message = "Giao dịch đã hoàn tất thành công",
+                        data = transactionResponse
+                    };
+                }
+                else if (transaction.Status == StatusTransactionEnum.CANCELLED.GetDescriptionFromEnum())
+                {
+                    transactionResponse.Status = "01";
+                    return new BaseResponse<TransactionResponse>
+                    {
+                        status = StatusCodes.Status400BadRequest.ToString(),
+                        message = "Giao dịch đã bị hủy",
+                        data = transactionResponse
+                    };
+                }
+                else
+                {
+                    return new BaseResponse<TransactionResponse>
+                    {
+                        status = StatusCodes.Status400BadRequest.ToString(),
+                        message = "Giao dịch chưa được hoàn tất",
+                        data = null
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi kiểm tra trạng thái giao dịch");
+                return new BaseResponse<TransactionResponse>
+                {
+                    status = StatusCodes.Status500InternalServerError.ToString(),
+                    message = "Lỗi hệ thống khi kiểm tra trạng thái giao dịch",
+                    data = null
+                };
+            }
+        }
+
+        public async Task<BaseResponse<bool>> HandlePaymentCallback(string paymentLinkId, long orderCode)
+        {
+            try
+            {
+                //if (!long.TryParse(paymentLinkId, out long parsedPaymentLinkId))
+                //{
+                //    return new BaseResponse<bool>
+                //    {
+                //        status = StatusCodes.Status400BadRequest.ToString(),
+                //        message = "Định dạng paymentLinkId không hợp lệ",
+                //        data = false
+                //    };
+                //}
+                var paymentInfo = await GetPaymentInfo(paymentLinkId);
+
+                var transaction = await _unitOfWork.GetRepository<Model.Entity.Transaction>()
+                    .SingleOrDefaultAsync(predicate: t => t.OrderCode == orderCode);
+
+                if (transaction == null)
+                {
+                    return new BaseResponse<bool>
+                    {
+                        status = StatusCodes.Status404NotFound.ToString(),
+                        message = "Không tìm thấy giao dịch",
+                        data = false
+                    };
+                }
+
+                if (paymentInfo.Status == "PAID")
+                {
+                    transaction.Status = StatusTransactionEnum.COMPLETED.GetDescriptionFromEnum();
+                    _unitOfWork.GetRepository<Model.Entity.Transaction>().UpdateAsync(transaction);
+                    await _unitOfWork.CommitAsync();
+
+                    return new BaseResponse<bool>
+                    {
+                        status = StatusCodes.Status200OK.ToString(),
+                        message = "Xử lý giao dịch thành công",
+                        data = true
+                    };
+                }
+                else if (paymentInfo.Status == "CANCELLED")
+                {
+                    transaction.Status = StatusTransactionEnum.CANCELLED.GetDescriptionFromEnum();
+                    _unitOfWork.GetRepository<Model.Entity.Transaction>().UpdateAsync(transaction);
+                    await _unitOfWork.CommitAsync();
+
+                    return new BaseResponse<bool>
+                    {
+                        status = StatusCodes.Status400BadRequest.ToString(),
+                        message = "Giao dịch đã bị hủy",
+                        data = false
+                    };
+                }
+                else
+                {
+                    return new BaseResponse<bool>
+                    {
+                        status = StatusCodes.Status400BadRequest.ToString(),
+                        message = "Giao dịch chưa được hoàn tất",
+                        data = false
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xử lý callback thanh toán");
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status500InternalServerError.ToString(),
+                    message = "Lỗi hệ thống khi xử lý giao dịch",
+                    data = false
+                };
+            }
+        }
+
         private string? ComputeHmacSha256(string data, string checksumKey)
         {
             using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(checksumKey)))
@@ -185,6 +332,32 @@ namespace GymRadar.Service.Implement
                 var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
+        }
+
+        public async Task<ExtendedPaymentInfo> GetPaymentInfo(string paymentLinkId)
+        {
+            try
+            {
+                var getUrl = $"https://api-merchant.payos.vn/v2/payment-requests/{paymentLinkId}";
+
+                var request = new HttpRequestMessage(HttpMethod.Get, getUrl);
+                request.Headers.Add("x-client-id", _payOSSettings.ClientId);
+                request.Headers.Add("x-api-key", _payOSSettings.ApiKey);
+
+                var response = await _client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonConvert.DeserializeObject<JObject>(responseContent);
+                var paymentInfo = responseObject["data"].ToObject<ExtendedPaymentInfo>();
+
+                return paymentInfo;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while getting payment info.", ex);
+            }
+            return new ExtendedPaymentInfo();
         }
     }
 }

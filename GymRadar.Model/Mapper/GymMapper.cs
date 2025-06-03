@@ -8,6 +8,7 @@ using GymRadar.Model.Entity;
 using GymRadar.Model.Enum;
 using GymRadar.Model.Payload.Request.Gym;
 using GymRadar.Model.Payload.Response.Gym;
+using GymRadar.Model.Payload.Response.Transaction;
 using GymRadar.Model.Utils;
 
 namespace GymRadar.Model.Mapper
@@ -26,6 +27,15 @@ namespace GymRadar.Model.Mapper
             CreateMap<Gym, CreateNewGymResponse>();
 
             CreateMap<Gym, GetGymResponse>();
+
+            CreateMap<Gym, GymResponse>()
+                .ForMember(dest => dest.Course, opt => opt.MapFrom(src => src.GymCourses.FirstOrDefault()))
+                .ForMember(dest => dest.PT, opt => opt.MapFrom(src =>
+                                                               src.GymCourses.FirstOrDefault() != null &&
+                                                               src.GymCourses.FirstOrDefault().Transactions.FirstOrDefault() != null &&
+                                                               src.GymCourses.FirstOrDefault().Transactions.FirstOrDefault().Pt != null
+                                                               ? src.GymCourses.FirstOrDefault().Transactions.FirstOrDefault().Pt
+                                                               : null));
         }
     }
 }

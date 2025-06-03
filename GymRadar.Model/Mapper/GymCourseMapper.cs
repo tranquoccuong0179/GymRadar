@@ -7,6 +7,7 @@ using AutoMapper;
 using GymRadar.Model.Entity;
 using GymRadar.Model.Payload.Request.GymCourse;
 using GymRadar.Model.Payload.Response.GymCourse;
+using GymRadar.Model.Payload.Response.Transaction;
 using GymRadar.Model.Utils;
 
 namespace GymRadar.Model.Mapper
@@ -25,6 +26,8 @@ namespace GymRadar.Model.Mapper
             CreateMap<GymCourse, CreateGymCourseResponse>();
 
             CreateMap<GymCourse, GetGymCourseResponse>();
+
+            CreateMap<GymCourse, CourseResponse>();
 
         }
     }

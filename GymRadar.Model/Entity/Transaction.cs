@@ -21,6 +21,8 @@ public partial class Transaction
 
     public Guid? PtId { get; set; }
 
+    public DateTime? CreateAt { get; set; }
+
     public virtual GymCourse? GymCourse { get; set; }
 
     public virtual Pt? Pt { get; set; }

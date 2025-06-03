@@ -228,6 +228,7 @@ public partial class GymRadarContext : DbContext
             entity.ToTable("Transaction");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
 

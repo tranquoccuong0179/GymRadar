@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.Booking;
 using GymRadar.Service.Implement;
+using GymRadar.Model.Payload.Response.Transaction;
 
 namespace GymRadar.API.Controllers
 {
@@ -13,10 +14,15 @@ namespace GymRadar.API.Controllers
     {
         private readonly IPTService _ptService;
         private readonly IBookingService _bookingService;
-        public AdminController(ILogger<AdminController> logger, IPTService ptService, IBookingService bookingService) : base(logger)
+        private readonly ITransactionService _transactionService;
+        public AdminController(ILogger<AdminController> logger, 
+                               IPTService ptService, 
+                               IBookingService bookingService, 
+                               ITransactionService transactionService) : base(logger)
         {
             _ptService = ptService;
             _bookingService = bookingService;
+            _transactionService = transactionService;
         }
 
         /// <summary>
@@ -96,6 +102,18 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _bookingService.GetBookingForAdmin(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.Admin.GetAllTransaction)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetTransactionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetTransactionResponse>>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllTransactionForAdmin([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _transactionService.GetAllTransactionForAdmin(pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
     }

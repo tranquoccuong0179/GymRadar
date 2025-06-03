@@ -7,6 +7,7 @@ using AutoMapper;
 using GymRadar.Model.Entity;
 using GymRadar.Model.Payload.Request.PT;
 using GymRadar.Model.Payload.Response.PT;
+using GymRadar.Model.Payload.Response.Transaction;
 using GymRadar.Model.Utils;
 
 namespace GymRadar.Model.Mapper
@@ -25,6 +26,8 @@ namespace GymRadar.Model.Mapper
             CreateMap<Pt, CreateNewPTResponse>();
 
             CreateMap<Pt, GetPTResponse>();
+
+            CreateMap<Pt, PTResponse>();
         }
     }
 }
