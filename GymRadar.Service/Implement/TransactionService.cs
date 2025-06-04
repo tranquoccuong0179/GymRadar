@@ -27,7 +27,11 @@ namespace GymRadar.Service.Implement
         {
             var transactions = await _unitOfWork.GetRepository<Transaction>().GetPagingListAsync(
                 selector: t => _mapper.Map<GetTransactionResponse>(t),
-                include: t => t.Include(t => t.GymCourse).ThenInclude(gc => gc.Gym).Include(t => t.Pt),
+                include: t => t.Include(t => t.GymCourse)
+                               .ThenInclude(gc => gc.Gym)
+                               .Include(t => t.Pt)
+                               .Include(t => t.User)
+                               .ThenInclude(u => u.Account),
                 page: page,
                 size: size);
 
@@ -72,7 +76,11 @@ namespace GymRadar.Service.Implement
             var transactions = await _unitOfWork.GetRepository<Transaction>().GetPagingListAsync(
                 selector: t => _mapper.Map<GetTransactionResponse>(t),
                 predicate: t => t.GymCourse.GymId.Equals(gym.Id),
-                include: t => t.Include(t => t.GymCourse).ThenInclude(gc => gc.Gym).Include(t => t.Pt),
+                include: t => t.Include(t => t.GymCourse)
+                               .ThenInclude(gc => gc.Gym)
+                               .Include(t => t.Pt)
+                               .Include(t => t.User)
+                               .ThenInclude(u => u.Account),
                 page: page,
                 size: size);
             return new BaseResponse<IPaginate<GetTransactionResponse>>
@@ -116,7 +124,11 @@ namespace GymRadar.Service.Implement
             var transactions = await _unitOfWork.GetRepository<Transaction>().GetPagingListAsync(
                 selector: t => _mapper.Map<GetTransactionResponse>(t),
                 predicate: t => t.UserId.Equals(user.Id),
-                include: t => t.Include(t => t.GymCourse).ThenInclude(gc => gc.Gym).Include(t => t.Pt),
+                include: t => t.Include(t => t.GymCourse)
+                               .ThenInclude(gc => gc.Gym)
+                               .Include(t => t.Pt)
+                               .Include(t => t.User)
+                               .ThenInclude(u => u.Account),
                 page: page,
                 size: size);
             return new BaseResponse<IPaginate<GetTransactionResponse>>

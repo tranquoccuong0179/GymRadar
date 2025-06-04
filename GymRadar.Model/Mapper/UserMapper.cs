@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Payload.Response.Transaction;
 using GymRadar.Model.Payload.Response.User;
 
 namespace GymRadar.Model.Mapper
@@ -14,6 +15,10 @@ namespace GymRadar.Model.Mapper
         public UserMapper()
         {
             CreateMap<User, GetUserResponse>();
+
+            CreateMap<User, GetCustomer>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Account.Email))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.Phone));
         }
     }
 }

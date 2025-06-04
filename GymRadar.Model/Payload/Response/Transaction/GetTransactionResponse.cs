@@ -12,6 +12,7 @@ namespace GymRadar.Model.Payload.Response.Transaction
         public string? Status { get; set; }
         public double? Price { get; set; }
         public DateTime? CreateAt { get; set; }
+        public GetCustomer? User { get; set; }
         public GymResponse? Gym { get; set; }
     }
 
@@ -33,5 +34,13 @@ namespace GymRadar.Model.Payload.Response.Transaction
     {
         public Guid Id { get; set; }
         public string? FullName { get; set; }
+    }
+
+    public class GetCustomer
+    {
+        public string? FullName { get; set;}
+        public string? Email { get; set;}
+        public string? PhoneNumber { get; set;}
+        public string? Address { get; set;}
     }
 }

@@ -14,7 +14,8 @@ namespace GymRadar.Model.Mapper
         public TransactionMapper()
         {
             CreateMap<Transaction, GetTransactionResponse>()
-                .ForMember(dest => dest.Gym, opt => opt.MapFrom(src => src.GymCourse.Gym));
+                .ForMember(dest => dest.Gym, opt => opt.MapFrom(src => src.GymCourse.Gym))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
         }
     }
 }
