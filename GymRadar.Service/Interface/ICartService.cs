@@ -13,6 +13,7 @@ namespace GymRadar.Service.Interface
     public interface ICartService
     {
         Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(CreateQRRequest request);
+        Task<BaseResponse<CreatePaymentResult>> CreatePaymentNotPT(CreateQRNotPTRequest request);
         Task<BaseResponse<bool>> HandlePaymentCallback(string paymentLinkId, long orderCode);
         Task<BaseResponse<TransactionResponse>> GetPaymentStatus(long orderCode);
     }

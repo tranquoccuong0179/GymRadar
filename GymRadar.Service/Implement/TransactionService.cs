@@ -32,6 +32,7 @@ namespace GymRadar.Service.Implement
                                .Include(t => t.Pt)
                                .Include(t => t.User)
                                .ThenInclude(u => u.Account),
+                orderBy: t => t.OrderByDescending(t => t.CreateAt),
                 page: page,
                 size: size);
 
@@ -81,6 +82,7 @@ namespace GymRadar.Service.Implement
                                .Include(t => t.Pt)
                                .Include(t => t.User)
                                .ThenInclude(u => u.Account),
+                orderBy: t => t.OrderByDescending(t => t.CreateAt),
                 page: page,
                 size: size);
             return new BaseResponse<IPaginate<GetTransactionResponse>>
@@ -129,6 +131,7 @@ namespace GymRadar.Service.Implement
                                .Include(t => t.Pt)
                                .Include(t => t.User)
                                .ThenInclude(u => u.Account),
+                orderBy: t => t.OrderByDescending(t => t.CreateAt),
                 page: page,
                 size: size);
             return new BaseResponse<IPaginate<GetTransactionResponse>>

@@ -100,6 +100,7 @@ namespace GymRadar.API.Constant
         {
             public const string CartEndPoint = ApiEndpoint + "/cart";
             public const string CreateQR = CartEndPoint;
+            public const string CreateQRNotPT = CartEndPoint + "/gym-course";
             public const string ReturnUrl = CartEndPoint + "/return";
             public const string GetPaymentStatus = CartEndPoint + "/status";
         }

@@ -27,6 +27,17 @@ namespace GymRadar.API.Controllers
             return StatusCode(int.Parse(response.status), response);
         }
 
+
+
+        [HttpPost(ApiEndPointConstant.Cart.CreateQRNotPT)]
+        [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> CreateQRNotPT([FromBody] CreateQRNotPTRequest request)
+        {
+            var response = await _cartService.CreatePaymentNotPT(request);
+            return StatusCode(int.Parse(response.status), response);
+        }
         [HttpGet(ApiEndPointConstant.Cart.ReturnUrl)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status400BadRequest)]

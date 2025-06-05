@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace GymRadar.Model.Payload.Request.Cart
 {
-    public class CreateQRRequest
+    public class CreateQRNotPTRequest
     {
         public Guid GymCourseId { get; set; }
-        public Guid? PTId { get; set; }
     }
 }
