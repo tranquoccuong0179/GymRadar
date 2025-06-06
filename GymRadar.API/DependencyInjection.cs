@@ -1,4 +1,7 @@
-﻿using GymRadar.Model.Entity;
+﻿using Appwrite;
+using Appwrite.Services;
+using GymRadar.Model.Entity;
+using GymRadar.Model.Payload.Settings;
 using GymRadar.Repository.Implement;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Implement;
@@ -83,6 +86,30 @@ namespace GymRadar.API
                         new SymmetricSecurityKey(Convert.FromHexString("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F00"))
                 };
             });
+            return services;
+        }
+
+        public static IServiceCollection AddAppwrite(this IServiceCollection services, IConfiguration configuration)
+        {
+            var appWriteSettings = configuration.GetSection("AppWrite").Get<AppWriteSettings>();
+            if (appWriteSettings == null)
+            {
+                throw new ArgumentNullException(nameof(appWriteSettings), "AppWrite configuration is missing.");
+            }
+
+            services.AddSingleton(appWriteSettings);
+
+            services.AddScoped<Client>(_ => new Client()
+                .SetEndpoint(appWriteSettings.EndPoint)
+                .SetProject(appWriteSettings.ProjectId)
+                .SetKey(appWriteSettings.APIKey));
+
+            services.AddScoped<Storage>(provider => new Storage(provider.GetRequiredService<Client>()));
+
+            services.AddHttpClient<IUploadService, UploadService>();
+
+            services.AddScoped<IUploadService, UploadService>();
+
             return services;
         }
 

@@ -14,6 +14,7 @@ using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymRadar.Service.Implement
@@ -118,8 +119,9 @@ namespace GymRadar.Service.Implement
         public async Task<BaseResponse<GetGymResponse>> GetGymById(Guid id)
         {
             var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
-                selector : g => _mapper.Map<GetGymResponse>(g),
-                predicate: g => g.Id.Equals(id) && g.Active == true);
+                //selector : g => _mapper.Map<GetGymResponse>(g),
+                predicate: g => g.Id.Equals(id) && g.Active == true,
+                include: g => g.Include(g => g.GymImages));
 
             if (gym == null)
             {
@@ -131,11 +133,17 @@ namespace GymRadar.Service.Implement
                 };
             }
 
+            var response = _mapper.Map<GetGymResponse>(gym);
+            response.Images = gym.GymImages.Select(img => new Model.Payload.Response.GymImage.GetGymImageResponse
+            {
+                Url = img.Url,
+            }).ToList();
+
             return new BaseResponse<GetGymResponse>
             {
                 status = StatusCodes.Status200OK.ToString(),
                 message = "Lấy thông tin phòng gym thành công",
-                data = gym
+                data = response
             };
         }
     }

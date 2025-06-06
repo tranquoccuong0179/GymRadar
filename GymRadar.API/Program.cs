@@ -101,7 +101,7 @@ builder.Services.AddScoped<PayOS>(sp =>
     var payOSSettings = sp.GetRequiredService<IOptions<PayOSSettings>>().Value;
     return new PayOS(payOSSettings.ClientId, payOSSettings.ApiKey, payOSSettings.ChecksumKey);
 });
-builder.Services.Configure<AppWriteSettings>(builder.Configuration.GetSection("AppWrite"));
+builder.Services.AddAppwrite(builder.Configuration);
 
 var app = builder.Build();
 

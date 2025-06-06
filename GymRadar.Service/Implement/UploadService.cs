@@ -21,20 +21,14 @@ namespace GymRadar.Service.Implement
 {
     public class UploadService :  IUploadService
     {
-        private readonly AppWriteSettings _appWriteSetting;
-        private readonly Client _client;
+        private readonly AppWriteSettings _appWriteSettings;
         private readonly Storage _storage;
         private readonly HttpClient _httpClient;
 
-        public UploadService(IOptions<AppWriteSettings> appWriteSetting, HttpClient httpClient)
+        public UploadService(AppWriteSettings appWriteSettings, Storage storage, HttpClient httpClient)
         {
-            _appWriteSetting = appWriteSetting.Value;
-            _client = new Client()
-            .SetEndpoint(_appWriteSetting.EndPoint)
-            .SetProject(_appWriteSetting.ProjectId)
-            .SetKey(_appWriteSetting.APIKey);
-
-            _storage = new Storage(_client);
+            _appWriteSettings = appWriteSettings;
+            _storage = storage;
             _httpClient = httpClient;
         }
 
@@ -45,14 +39,17 @@ namespace GymRadar.Service.Implement
 
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
-            if (!allowedExtensions.Contains(fileExtension))
+            if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension))
                 throw new ArgumentException("Only image files are allowed (.jpg, .jpeg, .png, .gif, .bmp).");
 
+            if (string.IsNullOrEmpty(file.FileName))
+                throw new ArgumentException("File name cannot be empty.");
+            if (string.IsNullOrEmpty(file.ContentType))
+                throw new ArgumentException("File content type cannot be empty.");
 
             try
             {
                 using var formContent = new MultipartFormDataContent();
-
                 formContent.Add(new StringContent("unique()"), "fileId");
 
                 using var fileStream = file.OpenReadStream();
@@ -61,15 +58,13 @@ namespace GymRadar.Service.Implement
                 formContent.Add(fileContent, "file", file.FileName);
 
                 var request = new HttpRequestMessage(HttpMethod.Post,
-                    $"{_appWriteSetting.EndPoint}/storage/buckets/{_appWriteSetting.Bucket}/files");
+                    $"{_appWriteSettings.EndPoint}/storage/buckets/{_appWriteSettings.Bucket}/files");
 
-                request.Headers.Add("X-Appwrite-Project", _appWriteSetting.ProjectId);
-                request.Headers.Add("X-Appwrite-Key", _appWriteSetting.APIKey);
+                request.Headers.Add("X-Appwrite-Project", _appWriteSettings.ProjectId);
+                request.Headers.Add("X-Appwrite-Key", _appWriteSettings.APIKey);
                 request.Content = formContent;
 
-
                 var response = await _httpClient.SendAsync(request);
-
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -77,7 +72,7 @@ namespace GymRadar.Service.Implement
                     using var jsonDoc = JsonDocument.Parse(responseContent);
                     var fileId = jsonDoc.RootElement.GetProperty("$id").GetString();
 
-                    var fileUrl = $"{_appWriteSetting.EndPoint}/storage/buckets/{_appWriteSetting.Bucket}/files/{fileId}/view?project={_appWriteSetting.ProjectId}";
+                    var fileUrl = $"{_appWriteSettings.EndPoint}/storage/buckets/{_appWriteSettings.Bucket}/files/{fileId}/view?project={_appWriteSettings.ProjectId}";
                     return fileUrl;
                 }
                 else
