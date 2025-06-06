@@ -121,5 +121,11 @@ namespace GymRadar.API.Constant
             public const string GetAllTransaction = TransactionEndPoint;
             public const string GetAllTransactionForGym = TransactionEndPoint + "/gym";
         }
+
+        public static class Upload
+        {
+            public const string UploadEndPoint = ApiEndpoint + "/upload";
+            public const string UploadImage = UploadEndPoint;
+        }
     }
 }

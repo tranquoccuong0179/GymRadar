@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymRadar.Model.Payload.Response.PayOS
+namespace GymRadar.Model.Payload.Settings
 {
     public class PayOSSettings
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace GymRadar.Model.Payload.Request.Gym
 {
@@ -23,6 +24,10 @@ namespace GymRadar.Model.Payload.Request.Gym
         public double Latitude { get; set; }
 
         public string Qrcode { get; set; } = null!;
+
+        public IFormFile MainImage { get; set; } = null!;
+
+        public List<IFormFile>? Images { get; set; }
 
     }
 }

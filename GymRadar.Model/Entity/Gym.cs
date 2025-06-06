@@ -35,9 +35,13 @@ public partial class Gym
 
     public DateTime? DeleteAt { get; set; }
 
+    public string? MainImage { get; set; }
+
     public virtual Account Account { get; set; } = null!;
 
     public virtual ICollection<GymCourse> GymCourses { get; set; } = new List<GymCourse>();
+
+    public virtual ICollection<GymImage> GymImages { get; set; } = new List<GymImage>();
 
     public virtual ICollection<Pt> Pts { get; set; } = new List<Pt>();
 

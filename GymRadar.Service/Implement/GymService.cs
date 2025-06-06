@@ -20,8 +20,14 @@ namespace GymRadar.Service.Implement
 {
     public class GymService : BaseService<GymService>, IGymService
     {
-        public GymService(IUnitOfWork<GymRadarContext> unitOfWork, ILogger<GymService> logger, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(unitOfWork, logger, mapper, httpContextAccessor)
+        private readonly IUploadService _uploadService;
+        public GymService(IUnitOfWork<GymRadarContext> unitOfWork, 
+                          ILogger<GymService> logger,
+                          IMapper mapper, 
+                          IHttpContextAccessor httpContextAccessor, 
+                          IUploadService uploadService) : base(unitOfWork, logger, mapper, httpContextAccessor)
         {
+            _uploadService = uploadService;
         }
 
         public async Task<BaseResponse<CreateNewGymResponse>> CreateNewGym(RegisterAccountGymRequest request)
@@ -31,7 +37,23 @@ namespace GymRadar.Service.Implement
 
             var gym = _mapper.Map<Gym>(request.CreateNewGym);
             gym.AccountId = account.Id;
+            gym.MainImage = await _uploadService.UploadImage(request.CreateNewGym.MainImage);
             await _unitOfWork.GetRepository<Gym>().InsertAsync(gym);
+
+            if (request.CreateNewGym.Images != null)
+            {
+                foreach (var image in request.CreateNewGym.Images)
+                {
+                    var gymImage = new GymImage
+                    {
+                        Id = Guid.NewGuid(),
+                        Url = await _uploadService.UploadImage(image),
+                        GymId = gym.Id,
+                    };
+
+                    await _unitOfWork.GetRepository<GymImage>().InsertAsync(gymImage);
+                }
+            }
 
             await _unitOfWork.CommitAsync();
 

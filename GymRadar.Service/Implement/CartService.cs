@@ -10,7 +10,6 @@ using GymRadar.Model.Enum;
 using GymRadar.Model.Payload.Request.Cart;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.Cart;
-using GymRadar.Model.Payload.Response.PayOS;
 using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
@@ -22,6 +21,7 @@ using Net.payOS;
 using Net.payOS.Types;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using GymRadar.Model.Payload.Settings;
 
 namespace GymRadar.Service.Implement
 {

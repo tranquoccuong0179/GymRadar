@@ -37,6 +37,7 @@ namespace GymRadar.API
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IUploadService, UploadService>();
             return services;
         }
         public static IServiceCollection AddHttpClientServices(this IServiceCollection services)

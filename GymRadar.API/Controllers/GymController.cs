@@ -91,7 +91,7 @@ namespace GymRadar.API.Controllers
         [ProducesResponseType(typeof(BaseResponse<CreateNewGymResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<CreateNewGymResponse>), StatusCodes.Status400BadRequest)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
-        public async Task<IActionResult> CreateNewGym([FromBody] RegisterAccountGymRequest request)
+        public async Task<IActionResult> CreateNewGym([FromForm] RegisterAccountGymRequest request)
         {
             var response = await _gymService.CreateNewGym(request);
             return StatusCode(int.Parse(response.status), response);

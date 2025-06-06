@@ -27,6 +27,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<GymCoursePt> GymCoursePts { get; set; }
 
+    public virtual DbSet<GymImage> GymImages { get; set; }
+
     public virtual DbSet<Pt> Pts { get; set; }
 
     public virtual DbSet<Ptslot> Ptslots { get; set; }
@@ -107,6 +109,7 @@ public partial class GymRadarContext : DbContext
             entity.Property(e => e.CreateAt).HasColumnType("datetime");
             entity.Property(e => e.DeleteAt).HasColumnType("datetime");
             entity.Property(e => e.GymName).HasMaxLength(50);
+            entity.Property(e => e.MainImage).IsUnicode(false);
             entity.Property(e => e.Qrcode)
                 .IsUnicode(false)
                 .HasColumnName("QRCode");
@@ -158,6 +161,20 @@ public partial class GymRadarContext : DbContext
                 .HasForeignKey(d => d.Ptid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GymCoursePT_PT_1");
+        });
+
+        modelBuilder.Entity<GymImage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_GynImage");
+
+            entity.ToTable("GymImage");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Url).IsUnicode(false);
+
+            entity.HasOne(d => d.Gym).WithMany(p => p.GymImages)
+                .HasForeignKey(d => d.GymId)
+                .HasConstraintName("FK_GynImage_Gym");
         });
 
         modelBuilder.Entity<Pt>(entity =>
