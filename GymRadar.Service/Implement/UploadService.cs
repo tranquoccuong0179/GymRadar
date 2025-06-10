@@ -37,10 +37,10 @@ namespace GymRadar.Service.Implement
             if (file == null || file.Length == 0)
                 throw new ArgumentException("No file uploaded.");
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"};
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
             if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension))
-                throw new ArgumentException("Only image files are allowed (.jpg, .jpeg, .png, .gif, .bmp).");
+                throw new ArgumentException("Only image files are allowed (.jpg, .jpeg, .png, .gif, .bmp, .webp).");
 
             if (string.IsNullOrEmpty(file.FileName))
                 throw new ArgumentException("File name cannot be empty.");

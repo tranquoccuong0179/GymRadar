@@ -89,7 +89,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CorsConstant.PolicyName,
         policy =>
         {
-            policy.WithOrigins("https://api.gymradar.cloud", "https://gymradar.cloud", "http://localhost:5173")
+            policy.WithOrigins("https://api.gymradar.cloud", "https://gymradar.cloud", "http://localhost:5173", "https://gym-radar-reactjs.vercel.app", "https://www.gymradar.cloud")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

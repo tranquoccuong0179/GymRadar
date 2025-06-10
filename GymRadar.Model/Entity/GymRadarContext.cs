@@ -29,6 +29,8 @@ public partial class GymRadarContext : DbContext
 
     public virtual DbSet<GymImage> GymImages { get; set; }
 
+    public virtual DbSet<Premium> Premia { get; set; }
+
     public virtual DbSet<Pt> Pts { get; set; }
 
     public virtual DbSet<Ptslot> Ptslots { get; set; }
@@ -175,6 +177,17 @@ public partial class GymRadarContext : DbContext
             entity.HasOne(d => d.Gym).WithMany(p => p.GymImages)
                 .HasForeignKey(d => d.GymId)
                 .HasConstraintName("FK_GynImage_Gym");
+        });
+
+        modelBuilder.Entity<Premium>(entity =>
+        {
+            entity.ToTable("Premium");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.DeleteAt).HasColumnType("datetime");
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Pt>(entity =>

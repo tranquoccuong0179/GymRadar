@@ -127,5 +127,13 @@ namespace GymRadar.API.Constant
             public const string UploadEndPoint = ApiEndpoint + "/upload";
             public const string UploadImage = UploadEndPoint;
         }
+
+        public static class Premium
+        {
+            public const string PremiumEndPoint = ApiEndpoint + "/premium";
+            public const string CreatePremium = PremiumEndPoint;
+            public const string GetAllPremium = PremiumEndPoint;
+            public const string GetPremiumById = PremiumEndPoint + "/{id}";
+        }
     }
 }
