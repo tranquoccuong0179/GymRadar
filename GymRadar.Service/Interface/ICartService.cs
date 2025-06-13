@@ -14,6 +14,7 @@ namespace GymRadar.Service.Interface
     {
         Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlRegisterCreator(CreateQRRequest request);
         Task<BaseResponse<CreatePaymentResult>> CreatePaymentNotPT(CreateQRNotPTRequest request);
+        Task<BaseResponse<CreatePaymentResult>> CreatePaymentUrlPremium(CreateQRPremiumRequest request);
         Task<BaseResponse<bool>> HandlePaymentCallback(string paymentLinkId, long orderCode);
         Task<BaseResponse<TransactionResponse>> GetPaymentStatus(long orderCode);
     }

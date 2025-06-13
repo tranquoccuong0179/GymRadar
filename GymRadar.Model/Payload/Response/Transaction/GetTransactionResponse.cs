@@ -11,6 +11,7 @@ namespace GymRadar.Model.Payload.Response.Transaction
         public Guid Id { get; set; }
         public string? Status { get; set; }
         public double? Price { get; set; }
+        public string? Type { get; set; }
         public DateTime? CreateAt { get; set; }
         public GetCustomer? User { get; set; }
         public GymResponse? Gym { get; set; }

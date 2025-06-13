@@ -38,6 +38,17 @@ namespace GymRadar.API.Controllers
             var response = await _cartService.CreatePaymentNotPT(request);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpPost(ApiEndPointConstant.Cart.CreateQRPremium)]
+        [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<CreatePaymentResult>), StatusCodes.Status400BadRequest)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> CreateQRPremium([FromBody] CreateQRPremiumRequest request)
+        {
+            var response = await _cartService.CreatePaymentUrlPremium(request);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
         [HttpGet(ApiEndPointConstant.Cart.ReturnUrl)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status400BadRequest)]
@@ -52,31 +63,16 @@ namespace GymRadar.API.Controllers
 
             if (!long.TryParse(orderCode, out long parsedOrderCode))
             {
-                return BadRequest(new
-                {
-                    code = "01",
-                    message = "Định dạng orderCode không hợp lệ"
-                });
+                var errorUrl = $"exp://192.168.1.223:8081/--/order-process?code=01";
+                return Redirect(errorUrl);
             }
 
             var response = await _cartService.HandlePaymentCallback(id, parsedOrderCode);
-            if (response.status == StatusCodes.Status200OK.ToString())
-            {
-                return Ok(new
-                {
-                    code = "00",
-                    message = response.message,
-                    orderCode = parsedOrderCode
-                });
-            }
-            else
-            {
-                return BadRequest(new
-                {
-                    code = "01",
-                    message = response.message
-                });
-            }
+            var redirectUrl = response.status == StatusCodes.Status200OK.ToString()
+                ? $"exp://192.168.1.223:8081/--/order-process?code=00&message&orderCode={parsedOrderCode}"
+                : $"exp://192.168.1.223:8081/--/order-process?code=01";
+
+            return Redirect(redirectUrl);
         }
 
         [HttpGet(ApiEndPointConstant.Cart.GetPaymentStatus)]

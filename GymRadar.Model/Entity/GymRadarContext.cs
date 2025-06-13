@@ -261,10 +261,15 @@ public partial class GymRadarContext : DbContext
             entity.Property(e => e.CreateAt).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Type).HasMaxLength(50);
 
             entity.HasOne(d => d.GymCourse).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.GymCourseId)
                 .HasConstraintName("FK_Transaction_GymCourse_1");
+
+            entity.HasOne(d => d.Premium).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.PremiumId)
+                .HasConstraintName("FK_Transaction_Premium");
 
             entity.HasOne(d => d.Pt).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.PtId)

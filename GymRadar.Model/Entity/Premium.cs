@@ -20,4 +20,6 @@ public partial class Premium
     public DateTime? UpdateAt { get; set; }
 
     public DateTime? DeleteAt { get; set; }
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }
