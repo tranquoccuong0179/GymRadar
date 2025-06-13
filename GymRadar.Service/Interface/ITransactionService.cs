@@ -14,5 +14,6 @@ namespace GymRadar.Service.Interface
         Task<BaseResponse<IPaginate<GetTransactionResponse>>> GetAllTransactionForUser(int page, int size);
         Task<BaseResponse<IPaginate<GetTransactionResponse>>> GetAllTransactionForAdmin(int page, int size);
         Task<BaseResponse<IPaginate<GetTransactionResponse>>> GetAllTransactionForGym(int page, int size);
+        Task<BaseResponse<GetTransactionResponse>> GetTransactionById(Guid id);
     }
 }

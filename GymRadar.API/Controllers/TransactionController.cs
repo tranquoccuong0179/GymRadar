@@ -39,5 +39,15 @@ namespace GymRadar.API.Controllers
             var response = await _transactionService.GetAllTransactionForGym(pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
+
+        [HttpGet(ApiEndPointConstant.Transaction.GetTransactionById)]
+        [ProducesResponseType(typeof(BaseResponse<GetTransactionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<GetTransactionResponse>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetTransactionById([FromRoute] Guid id)
+        {
+            var response = await _transactionService.GetTransactionById(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
     }
 }

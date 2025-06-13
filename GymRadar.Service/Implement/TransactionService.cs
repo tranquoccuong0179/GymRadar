@@ -141,5 +141,33 @@ namespace GymRadar.Service.Implement
                 data = transactions
             };
         }
+
+        public async Task<BaseResponse<GetTransactionResponse>> GetTransactionById(Guid id)
+        {
+            var transaction = await _unitOfWork.GetRepository<Transaction>().SingleOrDefaultAsync(
+                selector: t => _mapper.Map<GetTransactionResponse>(t),
+                predicate: t => t.Id.Equals(id),
+                include: t => t.Include(t => t.GymCourse)
+                               .ThenInclude(gc => gc.Gym)
+                               .Include(t => t.Pt)
+                               .Include(t => t.User)
+                               .ThenInclude(u => u.Account));
+            if (transaction == null)
+            {
+                return new BaseResponse<GetTransactionResponse>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy giao dịch",
+                    data = null
+                };
+            }
+
+            return new BaseResponse<GetTransactionResponse>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy thông tin giao dịch thành công",
+                data = transaction
+            };
+        }
     }
 }
