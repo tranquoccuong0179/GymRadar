@@ -7,9 +7,8 @@ using GymRadar.Model.Payload.Response.Gym;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.PT;
-using GymRadar.Service.Implement;
 using GymRadar.Model.Payload.Response.GymCourse;
-using Microsoft.AspNetCore.Authorization;
+using GymRadar.Model.Payload.Response.Dashboard;
 
 namespace GymRadar.API.Controllers
 {
@@ -18,11 +17,17 @@ namespace GymRadar.API.Controllers
         private readonly IGymService _gymService;
         private readonly IPTService _ptService;
         private readonly IGymCourseService _courseService;
-        public GymController(ILogger<GymController> logger, IGymService gymService, IPTService ptService, IGymCourseService courseService) : base(logger)
+        private readonly IDashboardService _dashboardService;
+        public GymController(ILogger<GymController> logger, 
+                             IGymService gymService, 
+                             IPTService ptService, 
+                             IGymCourseService courseService, 
+                             IDashboardService dashboardService) : base(logger)
         {
             _gymService = gymService;
             _ptService = ptService;
             _courseService = courseService;
+            _dashboardService = dashboardService;
         }
 
         /// <summary>
@@ -382,6 +387,15 @@ namespace GymRadar.API.Controllers
         public async Task<IActionResult> DeleteGym([FromRoute] Guid id)
         {
             var response = await _gymService.DeleteGym(id);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.Gym.Dashboard)]
+        [ProducesResponseType(typeof(BaseResponse<GetDashboardTransactionResponseByGym>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GymDashboard([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        {
+            var response = await _dashboardService.GetDashboardTransactionByGym(startDate, endDate);
             return StatusCode(int.Parse(response.status), response);
         }
     }
