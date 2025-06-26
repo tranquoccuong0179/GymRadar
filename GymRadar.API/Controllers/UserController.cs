@@ -1,5 +1,6 @@
 ﻿
 using GymRadar.API.Constant;
+using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.PT;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
@@ -77,6 +78,27 @@ namespace GymRadar.API.Controllers
         public async Task<IActionResult> UpdatePT([FromBody] UpdateUserRequest request)
         {
             var response = await _userService.UpdateUser(request);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.User.GetAllUser)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetUserResponse>>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllUser([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _userService.GetAllUser(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpDelete(ApiEndPointConstant.User.DeleteUser)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
+        {
+            var response = await _userService.DeleteUser(id);
             return StatusCode(int.Parse(response.status), response);
         }
     }

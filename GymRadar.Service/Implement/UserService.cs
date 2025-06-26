@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GymRadar.Model.Entity;
+using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.User;
 using GymRadar.Model.Payload.Response;
 using GymRadar.Model.Payload.Response.User;
@@ -20,6 +21,67 @@ namespace GymRadar.Service.Implement
     {
         public UserService(IUnitOfWork<GymRadarContext> unitOfWork, ILogger<UserService> logger, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(unitOfWork, logger, mapper, httpContextAccessor)
         {
+        }
+
+        public async Task<BaseResponse<bool>> DeleteUser(Guid id)
+        {
+            var user = await _unitOfWork.GetRepository<User>().SingleOrDefaultAsync(
+                predicate: u => u.Id.Equals(id) && u.Active == true);
+
+            if (user == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy người dùng",
+                    data = false,
+                };
+            }
+
+            user.Active = false;
+            user.DeleteAt = TimeUtil.GetCurrentSEATime();
+            _unitOfWork.GetRepository<User>().UpdateAsync(user);
+
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(user.AccountId) && a.Active == true);
+            if (account == null)
+            {
+                return new BaseResponse<bool>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản",
+                    data = false,
+                };
+            }
+
+            account.Active = false;
+            account.DeleteAt = TimeUtil.GetCurrentSEATime();
+            _unitOfWork.GetRepository<Account>().UpdateAsync(account);
+
+            await _unitOfWork.CommitAsync();
+
+            return new BaseResponse<bool>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Xóa người dùng thành công",
+                data = true
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetUserResponse>>> GetAllUser(int page, int size)
+        {
+            var response = await _unitOfWork.GetRepository<User>().GetPagingListAsync(
+                selector: u => _mapper.Map<GetUserResponse>(u),
+                predicate: u => u.Active == true,
+                page: page,
+                size: size);
+
+            return new BaseResponse<IPaginate<GetUserResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách người dùng thành công",
+                data = response
+            };
         }
 
         public async Task<BaseResponse<GetUserResponse>> UpdateUser(UpdateUserRequest request)

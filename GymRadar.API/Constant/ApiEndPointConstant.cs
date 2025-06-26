@@ -77,6 +77,8 @@ namespace GymRadar.API.Constant
         {
             public const string UserEndPoint = ApiEndpoint + "/user";
             public const string UpdateUser = UserEndPoint;
+            public const string GetAllUser = UserEndPoint;
+            public const string DeleteUser = UserEndPoint + "/{id}";
         }
 
         public static class PTSlot

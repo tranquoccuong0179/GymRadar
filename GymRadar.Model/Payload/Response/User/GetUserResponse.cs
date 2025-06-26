@@ -8,6 +8,8 @@ namespace GymRadar.Model.Payload.Response.User
 {
     public class GetUserResponse
     {
+        public Guid? Id { get; set; }
+
         public string? FullName { get; set; }
 
         public DateOnly? Dob { get; set; }
