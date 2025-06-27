@@ -14,6 +14,10 @@ namespace GymRadar.Model.Payload.Response.User
 
         public DateOnly? Dob { get; set; }
 
+        public string? Email {  get; set; }
+
+        public string? Phone {  get; set; }
+
         public double? Weight { get; set; }
 
         public double? Height { get; set; }

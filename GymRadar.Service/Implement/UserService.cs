@@ -13,6 +13,7 @@ using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymRadar.Service.Implement
@@ -73,6 +74,7 @@ namespace GymRadar.Service.Implement
             var response = await _unitOfWork.GetRepository<User>().GetPagingListAsync(
                 selector: u => _mapper.Map<GetUserResponse>(u),
                 predicate: u => u.Active == true,
+                include: u => u.Include(u => u.Account),
                 page: page,
                 size: size);
 
@@ -102,7 +104,8 @@ namespace GymRadar.Service.Implement
             }
 
             var user = await _unitOfWork.GetRepository<User>().SingleOrDefaultAsync(
-                predicate: u => u.AccountId.Equals(userId) && u.Active == true);
+                predicate: u => u.AccountId.Equals(userId) && u.Active == true,
+                include: u => u.Include(u => u.Account));
 
             if (user == null)
             {

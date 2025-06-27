@@ -160,6 +160,7 @@ namespace GymRadar.Service.Implement
                     response.FullName = pt.FullName;
                     response.Weight = pt.Weight;
                     response.Height = pt.Height;
+                    response.Gender = pt.Gender;
                     break;
                 case "USER":
                     var user = await _unitOfWork.GetRepository<User>().SingleOrDefaultAsync(
@@ -180,6 +181,8 @@ namespace GymRadar.Service.Implement
                     response.FullName = user.FullName;
                     response.Weight = user.Weight;
                     response.Height = user.Height;
+                    response.Gender = user.Gender;
+                    response.Address = user.Address;
                     break;
                 default:
                     return new BaseResponse<GetUserProfileResponse>
