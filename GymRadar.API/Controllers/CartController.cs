@@ -63,14 +63,18 @@ namespace GymRadar.API.Controllers
 
             if (!long.TryParse(orderCode, out long parsedOrderCode))
             {
-                var errorUrl = $"exp://192.168.1.223:8081/--/order-process?code=01";
+                //var errorUrl = $"exp://192.168.1.223:8081/--/order-process?code=01";
+                var errorUrl = $"exp://172.20.10.2:8081/--/order-process?code=01";
                 return Redirect(errorUrl);
             }
 
             var response = await _cartService.HandlePaymentCallback(id, parsedOrderCode);
+            //var redirectUrl = response.status == StatusCodes.Status200OK.ToString()
+            //    ? $"exp://192.168.1.223:8081/--/order-process?code=00&message&orderCode={parsedOrderCode}"
+            //    : $"exp://192.168.1.223:8081/--/order-process?code=01";
             var redirectUrl = response.status == StatusCodes.Status200OK.ToString()
-                ? $"exp://192.168.1.223:8081/--/order-process?code=00&message&orderCode={parsedOrderCode}"
-                : $"exp://192.168.1.223:8081/--/order-process?code=01";
+                ? $"exp://172.20.10.2:8081/--/order-process?code=00&message&orderCode={parsedOrderCode}"
+                : $"exp://172.20.10.2:8081/--/order-process?code=01";
 
             return Redirect(redirectUrl);
         }
