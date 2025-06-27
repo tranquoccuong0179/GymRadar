@@ -100,11 +100,11 @@ namespace GymRadar.Service.Implement
             };
         }
 
-        public async Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size)
+        public async Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size, string name)
         {
             var gyms = await _unitOfWork.GetRepository<Gym>().GetPagingListAsync(
                 selector: g => _mapper.Map<GetGymResponse>(g),
-                predicate: g => g.Active == true,
+                predicate: g => (string.IsNullOrEmpty(name) || g.GymName.Contains(name)) && g.Active == true,
                 page: page,
                 size: size);
 

@@ -156,11 +156,11 @@ namespace GymRadar.API.Controllers
         [HttpGet(ApiEndPointConstant.Gym.GetAllGym)]
         [ProducesResponseType(typeof(BaseResponse<IPaginate<GetGymResponse>>), StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ProblemDetails))]
-        public async Task<IActionResult> GetAllGym([FromQuery] int? page, [FromQuery] int? size)
+        public async Task<IActionResult> GetAllGym([FromQuery] int? page, [FromQuery] int? size, [FromQuery] string? name)
         {
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
-            var response = await _gymService.GetAllGym(pageNumber, pageSize);
+            var response = await _gymService.GetAllGym(pageNumber, pageSize, name);
             return StatusCode(int.Parse(response.status), response);
         }
 

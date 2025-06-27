@@ -13,7 +13,7 @@ namespace GymRadar.Service.Interface
     public interface IGymService
     {
         Task<BaseResponse<CreateNewGymResponse>> CreateNewGym(RegisterAccountGymRequest request);
-        Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size);
+        Task<BaseResponse<IPaginate<GetGymResponse>>> GetAllGym(int page, int size, string name);
         Task<BaseResponse<GetGymResponse>> GetGymById(Guid id);
         Task<BaseResponse<bool>> DeleteGym(Guid id);
     }
