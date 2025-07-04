@@ -33,6 +33,7 @@ namespace GymRadar.API.Constant
             public const string GetGym = GymEndPoint + "/{id}";
             public const string GetAllPT = GymEndPoint + "/{id}/pts";
             public const string GetAllCourse = GymEndPoint + "/{id}/courses";
+            public const string GetAllSlotByGymId = GymEndPoint + "/{id}/slots";
             public const string DeleteGym = GymEndPoint + "/{id}";
             public const string Dashboard = GymEndPoint + "/me/dashboard";
         }
@@ -45,6 +46,7 @@ namespace GymRadar.API.Constant
             public const string DeletePT = PTEndPoint + "/{id}";
             public const string UpdatePT = PTEndPoint;
             public const string GetPT = PTEndPoint + "/{id}";
+            public const string GetAllSlot = PTEndPoint + "/slots";
         }
 
         public static class Admin

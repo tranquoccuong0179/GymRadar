@@ -8,15 +8,18 @@ using Microsoft.AspNetCore.Mvc;
 using GymRadar.Model.Payload.Response.PT;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.PT;
+using GymRadar.Model.Payload.Response.Slot;
 
 namespace GymRadar.API.Controllers
 {
     public class PTController : BaseController<PTController>
     {
         private readonly IPTService _ptService;
-        public PTController(ILogger<PTController> logger, IPTService ptService) : base(logger)
+        private readonly ISlotService _slotService;
+        public PTController(ILogger<PTController> logger, IPTService ptService, ISlotService slotService) : base(logger)
         {
             _ptService = ptService;
+            _slotService = slotService;
         }
 
         /// <summary>
@@ -183,6 +186,17 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _ptService.GetAllPT(pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.PT.GetAllSlot)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetSlotResponse>>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllSlot([FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _slotService.GetAllSlotForPT(pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
 

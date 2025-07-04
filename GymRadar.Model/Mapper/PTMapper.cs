@@ -25,7 +25,9 @@ namespace GymRadar.Model.Mapper
 
             CreateMap<Pt, CreateNewPTResponse>();
 
-            CreateMap<Pt, GetPTResponse>();
+            CreateMap<Pt, GetPTResponse>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Account.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Account.Phone));
 
             CreateMap<Pt, PTResponse>();
         }

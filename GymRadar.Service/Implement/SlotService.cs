@@ -8,6 +8,7 @@ using GymRadar.Model.Entity;
 using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Request.Slot;
 using GymRadar.Model.Payload.Response;
+using GymRadar.Model.Payload.Response.Booking;
 using GymRadar.Model.Payload.Response.Slot;
 using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
@@ -138,9 +139,105 @@ namespace GymRadar.Service.Implement
 
         public async Task<BaseResponse<IPaginate<GetSlotResponse>>> GetAllSlot(int page, int size)
         {
+            Guid? accountId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(accountId) && a.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<IPaginate<GetSlotResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản người dùng",
+                    data = null
+                };
+            }
+
+            var gym = await _unitOfWork.GetRepository<Gym>().SingleOrDefaultAsync(
+                predicate: u => u.AccountId.Equals(accountId) && u.Active == true);
+
+            if (gym == null)
+            {
+                return new BaseResponse<IPaginate<GetSlotResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy chủ phòng gym",
+                    data = null
+                };
+            }
+
             var slots = await _unitOfWork.GetRepository<Slot>().GetPagingListAsync(
                 selector: s => _mapper.Map<GetSlotResponse>(s),
-                predicate: s => s.Active == true,
+                predicate: s => s.GymId.Equals(gym.Id) && s.Active == true,
+                page: page,
+                size: size);
+
+
+            return new BaseResponse<IPaginate<GetSlotResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách slot thành công",
+                data = slots
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetSlotResponse>>> GetAllSlotByGym(Guid id, int page, int size)
+        {
+            var slots = await _unitOfWork.GetRepository<Slot>().GetPagingListAsync(
+                selector: s => _mapper.Map<GetSlotResponse>(s),
+                predicate: s => s.GymId.Equals(id) && s.Active == true,
+                page: page,
+                size: size);
+
+
+            return new BaseResponse<IPaginate<GetSlotResponse>>
+            {
+                status = StatusCodes.Status200OK.ToString(),
+                message = "Lấy danh sách slot thành công",
+                data = slots
+            };
+        }
+
+        public async Task<BaseResponse<IPaginate<GetSlotResponse>>> GetAllSlotForPT(int page, int size)
+        {
+            Guid? accountId = UserUtil.GetAccountId(_httpContextAccessor.HttpContext);
+
+            var account = await _unitOfWork.GetRepository<Account>().SingleOrDefaultAsync(
+                predicate: a => a.Id.Equals(accountId) && a.Active == true);
+
+            if (account == null)
+            {
+                return new BaseResponse<IPaginate<GetSlotResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy tài khoản người dùng",
+                    data = null
+                };
+            }
+
+            var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
+                predicate: u => u.AccountId.Equals(accountId) && u.Active == true);
+
+            if (pt == null)
+            {
+                return new BaseResponse<IPaginate<GetSlotResponse>>
+                {
+                    status = StatusCodes.Status404NotFound.ToString(),
+                    message = "Không tìm thấy PT",
+                    data = null
+                };
+            }
+
+            var existingSlotIds = await _unitOfWork.GetRepository<Ptslot>().GetListAsync(
+                selector: s => s.SlotId,
+                predicate: s => s.Ptid.Equals(pt.Id) && s.Active == true);
+
+            var slots = await _unitOfWork.GetRepository<Slot>().GetPagingListAsync(
+                selector: s => _mapper.Map<GetSlotResponse>(s),
+                predicate: s => s.GymId.Equals(pt.GymId) && 
+                                s.Active == true &&
+                                !existingSlotIds.Contains(s.Id),
                 page: page,
                 size: size);
 

@@ -15,6 +15,7 @@ using GymRadar.Model.Utils;
 using GymRadar.Repository.Interface;
 using GymRadar.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymRadar.Service.Implement
@@ -160,6 +161,7 @@ namespace GymRadar.Service.Implement
             var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
                 selector: p => _mapper.Map<GetPTResponse>(p),
                 predicate: p => p.GymId.Equals(gym.Id) && p.Active == true,
+                include: p => p.Include(p => p.Account),
                 page: page,
                 size: size);
 
@@ -176,6 +178,7 @@ namespace GymRadar.Service.Implement
             var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
                 selector: p => _mapper.Map<GetPTResponse>(p),
                 predicate: p => p.Active == true,
+                include: p => p.Include(p => p.Account),
                 page: page,
                 size: size);
 
@@ -204,6 +207,7 @@ namespace GymRadar.Service.Implement
             var pts = await _unitOfWork.GetRepository<Pt>().GetPagingListAsync(
                 selector: p => _mapper.Map<GetPTResponse>(p),
                 predicate: p => p.GymId.Equals(gym.Id) && p.Active == true,
+                include: p => p.Include(p => p.Account),
                 page: page,
                 size: size);
 
@@ -219,7 +223,8 @@ namespace GymRadar.Service.Implement
         {
             var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
                 selector: pt => _mapper.Map<GetPTResponse>(pt),
-                predicate: pt => pt.Id.Equals(id) && pt.Active == true);
+                predicate: pt => pt.Id.Equals(id) && pt.Active == true,
+                include: p => p.Include(p => p.Account));
 
             if (pt == null)
             {
@@ -255,7 +260,8 @@ namespace GymRadar.Service.Implement
             }
 
             var pt = await _unitOfWork.GetRepository<Pt>().SingleOrDefaultAsync(
-                predicate: pt => pt.AccountId.Equals(userId) && pt.Active == true);
+                predicate: pt => pt.AccountId.Equals(userId) && pt.Active == true,
+                include: p => p.Include(p => p.Account));
 
             if (pt == null)
             {

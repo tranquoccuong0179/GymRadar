@@ -9,6 +9,7 @@ using GymRadar.Model.Paginate;
 using GymRadar.Model.Payload.Response.PT;
 using GymRadar.Model.Payload.Response.GymCourse;
 using GymRadar.Model.Payload.Response.Dashboard;
+using GymRadar.Model.Payload.Response.Slot;
 
 namespace GymRadar.API.Controllers
 {
@@ -18,16 +19,19 @@ namespace GymRadar.API.Controllers
         private readonly IPTService _ptService;
         private readonly IGymCourseService _courseService;
         private readonly IDashboardService _dashboardService;
+        private readonly ISlotService _slotService;
         public GymController(ILogger<GymController> logger, 
                              IGymService gymService, 
                              IPTService ptService, 
                              IGymCourseService courseService, 
-                             IDashboardService dashboardService) : base(logger)
+                             IDashboardService dashboardService,
+                             ISlotService slotService) : base(logger)
         {
             _gymService = gymService;
             _ptService = ptService;
             _courseService = courseService;
             _dashboardService = dashboardService;
+            _slotService = slotService;
         }
 
         /// <summary>
@@ -275,6 +279,17 @@ namespace GymRadar.API.Controllers
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
             var response = await _ptService.GetAllPTForUser(id, pageNumber, pageSize);
+            return StatusCode(int.Parse(response.status), response);
+        }
+
+        [HttpGet(ApiEndPointConstant.Gym.GetAllSlotByGymId)]
+        [ProducesResponseType(typeof(BaseResponse<IPaginate<GetSlotResponse>>), StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAllSlot([FromRoute] Guid id, [FromQuery] int? page, [FromQuery] int? size)
+        {
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            var response = await _slotService.GetAllSlotByGym(id, pageNumber, pageSize);
             return StatusCode(int.Parse(response.status), response);
         }
 

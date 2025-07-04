@@ -57,7 +57,7 @@ namespace GymRadar.Service.Implement
                 case RoleEnum.GYM:
                     var gym = await _unitOfWork.GetRepository<Gym>()
                         .SingleOrDefaultAsync(predicate: g => g.AccountId == account.Id);
-                    fullName = gym?.RepresentName;
+                    fullName = gym?.GymName;
                     break;
 
                 case RoleEnum.PT:
